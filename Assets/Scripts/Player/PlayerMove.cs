@@ -4,35 +4,60 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    //References
+
+    [field: Header("Movement Speed Settings")]
+    // スキルを使うとき速度
+    [field: SerializeField] float SkillMovementSpeed { set; get; } = 5.0f;
+    //最大移動速度
+    [field: SerializeField] float NormalMovementSpeed { set; get; } = 3.0f;
+    //草に入る速度
+    [field: SerializeField] float BushMovementSpeed { set; get; } = 1.25f;
+    //回転速度
+    //[field: SerializeField] float RotationSpeed { set; get; } = 3.0f;
+
+
+    [field: Header("Player Move Settings")]
+    //プレイヤーが移動するためにマウスと最低距離（画面座標）
+    [field: SerializeField] float MinDistanceToMove { set; get; } = 10.0f;
+
+    [field: Header("Player Move Direction")]
+    //移動方向
+    [field: SerializeField] Vector3 moveDir;
+    //回転
+    [field: SerializeField] Quaternion lookRot;
+
+    [field: Header("Player Properties")]
+    //入力請けいるかどうか
+    [field: SerializeField] bool isInputDisabled;
+
+    //最大移動速度
+    [field: SerializeField] public float MovementSpeed { private set; get; } = 3.0f;
+    //プレイヤー動くかどうか（MinDistanceToMoveによって）
+    [field: SerializeField] bool IsPlayerMoving { set; get; }
+    public bool IsInputDisabled
+    {
+        set
+        {
+            isInputDisabled = value;
+            MovementSpeed = 0.0f;
+            PlayerWalkRunSoundHandler(false);
+        }
+        get { return isInputDisabled; }
+    }
+
+    [field: Header("Script References")]
     PlayerSkillCrushAndRun playerSkill;
     PlayerTriggerBody playerTriggerBody;
     PlayerEnergy playerEnergy;
     PlayerTool playerTool;
+    [field: SerializeField] SFXPlay sfxPlayWalk;
+    [field: SerializeField] SFXPlay sfxPlayRun;
 
+    [field: Header("Component References")]
     Rigidbody rb;
 
-    [field: SerializeField] public float NormalMovementSpeed { private set; get; } = 3.0f;   //最大移動速度
-    [field: SerializeField] public float BushMovementSpeed { private set; get; } = 1.25f;
-    [field: SerializeField] public float MovementSpeed { private set; get; } = 3.0f;   //最大移動速度
-
-    [Header("Player MinMax DistanceToMove")]
-    const float minDistanceToMove = 10.0f;      //プレイヤーが移動するためにマウスと最低距離
-
-    [Header("Player Move Direction")]
-    Vector3 moveDir;        //移動方向
-    Quaternion lookRot;     //回転
-    const float rotationSpeed = 3.0f;   //回転速度
-
-    [Header("Player Status")]
-    public bool isCanMove;
-
-    bool isPlayerMoving;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        MovementSpeed = 0.0f;
         playerSkill = GetComponent<PlayerSkillCrushAndRun>();
         playerTriggerBody = GetComponentInChildren<PlayerTriggerBody>();
         playerEnergy = GetComponent<PlayerEnergy>();
@@ -41,15 +66,20 @@ public class PlayerMove : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    // Start is called before the first frame update
+    void Start()
+    {
+        MovementSpeed = 0.0f;
+    }
+
     // Update is called once per frame
     void Update()
     {
-
-        if (!isCanMove)
+        if (IsInputDisabled)
         {
             return;
         }
-
+        PlayerWalkRunSoundHandler();
         MovementSpeedUpdate();
 
         if (playerTool.IsToolCuttingGrass)
@@ -89,8 +119,8 @@ public class PlayerMove : MonoBehaviour
         //--------------------------------------------------
         //Move 3    移動方法3（速度はリニア「線形」Non Stop(ずっと動く)）
         //--------------------------------------------------
-        isPlayerMoving = mousePlayerDistance > minDistanceToMove;
-        if (isPlayerMoving)
+        IsPlayerMoving = mousePlayerDistance > MinDistanceToMove;
+        if (IsPlayerMoving)
         {
             moveDir.x = mousePos.x - playerPosScreen.x;
             moveDir.y = 0.0f;
@@ -101,7 +131,7 @@ public class PlayerMove : MonoBehaviour
         lookRot = Quaternion.LookRotation(moveDir);
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         //Tools（草切機）がColliderがあるから
         //恐らく壁などに当たったときRigidbodyの速度が影響するので
@@ -109,14 +139,13 @@ public class PlayerMove : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        if (!isCanMove)
+        if (IsInputDisabled)
         {
             return;
         }
         //---------------------------------------------------------------
         //　移動方法　１（直接マウス方向へ移動（回転は見た目だけ））
         //---------------------------------------------------------------
-        //transform.position += moveDir * playerSharedData.MovementSpeed * Time.fixedDeltaTime;
         transform.position += moveDir * MovementSpeed * Time.fixedDeltaTime;
         transform.rotation = lookRot;
 
@@ -129,14 +158,11 @@ public class PlayerMove : MonoBehaviour
         //transform.rotation = Quaternion.Slerp(transform.rotation, lookRot, Time.fixedDeltaTime * rotationSpeed);
     }
 
-    public void SetIsCanMove(bool canMove = true)
-    {
-        isCanMove = canMove;
-    }
 
+    //どっちの移動速度を使うのはこの関数の中で決める
     void MovementSpeedUpdate()
     {
-        if (!isPlayerMoving)
+        if (!IsPlayerMoving)
         {
             MovementSpeed = 0.0f;
             return;
@@ -145,7 +171,7 @@ public class PlayerMove : MonoBehaviour
         MovementSpeed = NormalMovementSpeed;
         if (playerSkill.IsUseSkill)
         {
-            MovementSpeed = playerSkill.SkillMovementSpeed;
+            MovementSpeed = SkillMovementSpeed;
             return;
         }
 
@@ -159,6 +185,34 @@ public class PlayerMove : MonoBehaviour
         {
             MovementSpeed = BushMovementSpeed;
             return;
+        }
+    }
+
+    //プレイヤーのSFXを再生するの判断
+    void PlayerWalkRunSoundHandler(bool isPlay = true)
+    {
+        if (isPlay)
+        {
+            if (playerTool.IsToolCuttingGrass)
+            {
+                sfxPlayWalk.StopSFXSound();
+                sfxPlayRun.StopSFXSound();
+            }
+            else if (playerSkill.IsUseSkill)
+            {
+                sfxPlayWalk.StopSFXSound();
+                sfxPlayRun.PlaySFXSound();
+            }
+            else
+            {
+                sfxPlayRun.StopSFXSound();
+                sfxPlayWalk.PlaySFXSound();
+            }
+        }
+        else
+        {
+            sfxPlayWalk.StopSFXSound();
+            sfxPlayRun.StopSFXSound();
         }
     }
 }

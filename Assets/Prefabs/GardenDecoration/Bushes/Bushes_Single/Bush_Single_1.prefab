@@ -59,12 +59,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82a78ed5c3f84814181f8cb211be30fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skillGetValue: 10
-  <EnergyConsumeValue>k__BackingField: 15
-  <IsCuttedNow>k__BackingField: 0
-  <IsBushAlive>k__BackingField: 1
-  <OriPos>k__BackingField: {x: 0, y: 0, z: 0}
-  col: {fileID: 0}
+  <CutBushTimeMin>k__BackingField: 0.35
+  <CutBushTimeMax>k__BackingField: 0.75
+  <ShakePower>k__BackingField: 0.075
+  <EnergyConsumeValue>k__BackingField: 11.5
+  skillGetValue: 28.5
   sizeCurve:
     serializedVersion: 2
     m_Curve:
@@ -98,9 +97,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  <AnimationTime>k__BackingField: 1.5
+  <IsCuttedNow>k__BackingField: 0
+  <IsBushAlive>k__BackingField: 1
+  <OriPos>k__BackingField: {x: 0, y: 0, z: 0}
   <CutGrassTime>k__BackingField: 0
+  <CutGrassTimeOri>k__BackingField: 0
   objModel: {fileID: 0}
+  col: {fileID: 0}
 --- !u!1 &1259929341131622897
 GameObject:
   m_ObjectHideFlags: 0

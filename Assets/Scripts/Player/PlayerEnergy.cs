@@ -4,22 +4,44 @@ using UnityEngine;
 
 public class PlayerEnergy : MonoBehaviour
 {
-    PlayerUI playerUI;
-
-    [field: SerializeField] public float PlayerEnergyValue { private set; get; }
+    [field: Header("Energy Settings")]
+    //最低Energy
     [field: SerializeField] public float PlayerEnergyMin { private set; get; } = 0.0f;
+    //最大Energy
     [field: SerializeField] public float PlayerEnergyMax { private set; get; } = 100.0f;
+    //チャージしている時のもらうEnergy (Time.deltaTimeに掛ける)
     [field: SerializeField] public float EnergyChargePerSec { private set; get; } = 5.5f;
-    [field: SerializeField] public bool IsUseEnergy { private set; get; }
-    [field: SerializeField] public bool IsCanCutGrass { private set; get; }
-    [field: SerializeField] public bool IsRecharging { set; get; }
 
-    [field: SerializeField] SFXPlay sfxPlay;
+
+    [field: Header("Player Energy Property")]
+    //今のプレイヤーのEnergy
+    [field: SerializeField] public float PlayerEnergyValue { private set; get; }
+    //今Energyを使っているかどうか（草を刈っているかどうか）
+    [field: SerializeField] public bool IsUseEnergy { set; get; }
+    //今チャージしているかどうか
+    [field: SerializeField] public bool IsRecharging { set; get; }
+    //入力請けいるかどうか
+    [field: SerializeField] public bool IsInputDisabled { set; get; }
+
+    [field: Header("Script References")]
+    [field: SerializeField] PlayerTool playerTool;
+    [field: SerializeField] PlayerUI playerUI;
+    [field: SerializeField] SFXPlay sfxPlayEnergyRecharge;
+    [field: SerializeField] public SFXPlay SfxPlayCuttingGrass { private set; get; }
+
+
+
+    private void Awake()
+    {
+        playerTool = GetComponentInChildren<PlayerTool>();
+        playerUI = GetComponent<PlayerUI>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        playerUI = GetComponent<PlayerUI>();
+        //Energyの初期化
+        //最初のEnergyは満タンにする
         PlayerEnergyValue = PlayerEnergyMax;
         playerUI.UpdateEnergyBarUI();
     }
@@ -27,29 +49,41 @@ public class PlayerEnergy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (IsInputDisabled)
+        {
+            return;
+        }
+
+        if (Input.GetMouseButton(0))
         {
             IsUseEnergy = true;
+            if (playerTool.IsToolCuttingGrass)
+            {
+                SfxPlayCuttingGrass.PlaySFXSound();
+            }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
             IsUseEnergy = false;
+            SfxPlayCuttingGrass.StopSFXSound();
         }
 
         if (IsRecharging)
         {
             float chargeValue = EnergyChargePerSec * Time.deltaTime;
             AddPlayerEnergy(chargeValue);
-            sfxPlay.enabled = true;
+            sfxPlayEnergyRecharge.PlaySFXSound();
         }
         else
         {
-            sfxPlay.enabled = false;
+            sfxPlayEnergyRecharge.StopSFXSound();
         }
     }
 
-
+    //プレイヤーのEnergyを増やす
+    //増やす条件は家の前にいる（チャージエリアはprefabs/House/ChargingZone　設定する）
+    //valueはEnergyChargePerSecから変更する（[field:Header("Energy Settings")]の中）
     public void AddPlayerEnergy(float value)
     {
         PlayerEnergyValue += value;
@@ -60,7 +94,9 @@ public class PlayerEnergy : MonoBehaviour
         playerUI.UpdateEnergyBarUI();
     }
 
-    public void ReducePlayerEnergy(float value)
+    //プレイヤーのEnergyを減らす
+    //減らす値はvalueによって
+    void ReducePlayerEnergy(float value)
     {
         PlayerEnergyValue -= value;
         if (PlayerEnergyValue < PlayerEnergyMin)
@@ -70,6 +106,9 @@ public class PlayerEnergy : MonoBehaviour
         playerUI.UpdateEnergyBarUI();
     }
 
+    //草（bushes）を刈る
+    //energyNeededは草を刈る時の必要のenergy
+    //energyNeededはSingleBushスクリプトに設定する（prefabs/GardenDecoration/Bushes/Bushes_Single）
     public bool ActionCutGrass(float energyNeeded)
     {
         if (IsUseEnergy)

@@ -12,19 +12,30 @@ public class PresentAction : MonoBehaviour
     [SerializeField] ParticleSystem ps;
     private Vector3 mousePos;
 
-    NewPresentBoxManager newPresentBoxManager;
+    [SerializeField]NewPresentBoxManager newPresentBoxManager;
     NewPresentBox newPresentBox;
+
+    private void Awake()
+    {
+        newPresentBoxManager = FindObjectOfType<NewPresentBoxManager>();
+        newPresentBox = FindObjectOfType<NewPresentBox>();
+    }
 
     void Start()
     {
         clickCount = 0;
         ps.Stop();
-        newPresentBoxManager = FindObjectOfType<NewPresentBoxManager>();
-        newPresentBox = FindObjectOfType<NewPresentBox>();
+
     }
 
     void Update()
     {
+        if(newPresentBoxManager.presentTimeNow == 5.0f)
+        {
+            clickCount = 0;
+        }
+
+
         if (newPresentBoxManager.presentTimeNow < 5.0f && newPresentBoxManager.presentTimeNow > 0.0f)
         {
             if (Input.GetMouseButtonDown(0))
@@ -43,6 +54,12 @@ public class PresentAction : MonoBehaviour
             clickCount = 0;
             StartCoroutine(newPresentBoxManager.GetPresent());
             Debug.Log("15‰ñƒNƒŠƒbƒN‚µ‚½");
+        }
+
+        if(newPresentBoxManager.presentTimeNow < 0.0f  && clickCount < 15)
+        {
+            clickCount = 0;
+            StartCoroutine(newPresentBoxManager.NotGetPresent());
         }
     }
 

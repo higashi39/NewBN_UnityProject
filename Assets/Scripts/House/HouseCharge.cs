@@ -4,17 +4,10 @@ using UnityEngine;
 
 public class HouseCharge : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    //ChargeZone
+    //プレイヤーのEnergyを回復する
+    //回復値はPlayerToolから設定（Player->Tool）
+    //ChargeZoneはHouse/家の前に置く
 
     private void OnTriggerEnter(Collider other)
     {

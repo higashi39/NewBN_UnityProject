@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour
 {
+    [field: Header("Script References")]
     [field: SerializeField] PlayerMove playerMove;
     [field: SerializeField] PlayerSkillCrushAndRun playerSkill;
+    [field: SerializeField] PlayerEnergy playerEnergy;
+    [field: SerializeField] PlayerTool playerTool;
 
+    [field: Header("Component References")]
     [field: SerializeField] Animator anim;
 
     void Awake()
     {
         playerMove = GetComponentInParent<PlayerMove>();
         playerSkill = GetComponentInParent<PlayerSkillCrushAndRun>();
+        playerEnergy = GetComponentInParent<PlayerEnergy>();
+        playerTool = FindObjectOfType<PlayerTool>();
         anim = GetComponent<Animator>();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
     }
 
     // Update is called once per frame
@@ -27,10 +27,6 @@ public class PlayerAnimation : MonoBehaviour
     {
         anim.SetFloat("movementSpeed", playerMove.MovementSpeed);
         anim.SetBool("isUseSkill", playerSkill.IsUseSkill);
-    }
-
-    void SetPlayerAnimationSpeed(float speed = 1.0f)
-    {
-
+        anim.SetBool("isToolCuttingGrass", playerTool.IsToolCuttingGrass);
     }
 }

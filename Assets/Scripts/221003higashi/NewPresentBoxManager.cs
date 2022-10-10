@@ -36,6 +36,13 @@ public class NewPresentBoxManager : MonoBehaviour
     public float frameSize;                         // プレゼントのサイズを変更する値
     bool isRotate = true;                           // プレゼントが回転するかどうか
 
+    // UIの色の変数
+    public float colorR = 1.0f;
+    public float colorG = 1.0f;
+    public float colorB = 1.0f;
+
+
+    public bool isCalledTimeUpAnimation = false;           // 時間が終わったらプレゼントゲットしない時、
 
     //[Header("Present Box Info")]
     //public Text txtPresentInfo;
@@ -51,7 +58,7 @@ public class NewPresentBoxManager : MonoBehaviour
         presentBox.SetActive(false);
         decoration.SetActive(false);
         imgPresentDecorTransform = decoration.GetComponent<RectTransform>();
-        
+
         //Vector3 pos = GetComponent<RectTransform>().anchoredPosition;
         //pos.x = 0;
         //pos.y = 1000;
@@ -88,6 +95,7 @@ public class NewPresentBoxManager : MonoBehaviour
 
             StartCoroutine(TryPresent());
             presentSceneSetActive = false;
+            isCalledTimeUpAnimation = false;
         }
 
         // 制限時間の処理
@@ -119,54 +127,57 @@ public class NewPresentBoxManager : MonoBehaviour
         // 制限時間を減らす
         presentTimeNow -= Time.deltaTime;
         // 一定数制限時間が迫ったら
-        // 制限時間のUIを大小させたり、色を変えたりする
-        if (presentTimeNow <= 3.0f)
+        if (isIndicatePresent)
         {
-            // UIの色の変数
-            float colorR = 1.0f;
-            float colorG = 1.0f;
-            float colorB = 1.0f;
+            // 制限時間のUIを大小させたり、色を変えたりする
+            if (presentTimeNow <= 3.0f)
+            {
 
-            // 変更のスパン
-            changeSpeed = Time.deltaTime * 0.1f;
-            if (scaleChangeTime < 0)
-            {
-                enlarge = true;
-            }
-            if (scaleChangeTime > 0.6f)
-            {
-                enlarge = false;
-            }
+                // 変更のスパン
+                changeSpeed = Time.deltaTime * 0.1f;
+                if (scaleChangeTime < 0)
+                {
+                    enlarge = true;
+                }
+                if (scaleChangeTime > 0.6f)
+                {
+                    enlarge = false;
+                }
 
-            if (enlarge == true)
-            {
-                scaleChangeTime += Time.deltaTime;
-                txtPresentTime.transform.localScale += new Vector3(changeSpeed, changeSpeed, changeSpeed);
-                colorG--;
-                colorB--;
-            }
-            else
-            {
-                scaleChangeTime -= Time.deltaTime;
-                txtPresentTime.transform.localScale -= new Vector3(changeSpeed, changeSpeed, changeSpeed);
-                colorG++;
-                colorB++;
-            }
-            // UIの色の表示
-            txtPresentTime.color = new Color(colorR, colorG, colorB);
+                if (enlarge == true)
+                {
+                    scaleChangeTime += Time.deltaTime;
+                    txtPresentTime.transform.localScale += new Vector3(changeSpeed, changeSpeed, changeSpeed);
+                    colorG--;
+                    colorB--;
+                }
+                else
+                {
+                    scaleChangeTime -= Time.deltaTime;
+                    txtPresentTime.transform.localScale -= new Vector3(changeSpeed, changeSpeed, changeSpeed);
+                    colorG++;
+                    colorB++;
+                }
+                // UIの色の表示
+                txtPresentTime.color = new Color(colorR, colorG, colorB);
 
-            // 制限時間が0秒になったら
-            if (presentTimeNow <= 0.0f)
-            {
-                // --------------------------
-                // 開封時間終了(ゲームに戻る)
-                // --------------------------
-                presentTimeNow = 0.0f;
-                //StartCoroutine(NotGetPresent());
+                // 制限時間が0秒になったら
+                if (presentTimeNow <= 0.0f)
+                {
+                    // --------------------------
+                    // 開封時間終了(ゲームに戻る)
+                    // --------------------------
+                    presentTimeNow = 0.0f;
+                    if (!isCalledTimeUpAnimation)
+                    {
+                        isCalledTimeUpAnimation = true;
+                        StartCoroutine(NotGetPresent());
+                    }
 
-                // 色も大きさも戻す
-                txtPresentTime.transform.localScale = new Vector3(1, 1, 1);
-                txtPresentTime.color = new Color(1.0f, 1.0f, 1.0f);
+                    // 色も大きさも戻す
+                    txtPresentTime.transform.localScale = new Vector3(1, 1, 1);
+                    txtPresentTime.color = new Color(1.0f, 1.0f, 1.0f);
+                }
             }
         }
     }
@@ -197,7 +208,11 @@ public class NewPresentBoxManager : MonoBehaviour
         presentBox.transform.localScale = new Vector3(frameSize, frameSize, frameSize);
         if (!isRotate)
         {
-            presentBox.transform.rotation = Quaternion.Euler(0, 0, 0);
+            //*****************************************************
+            //最後はカメラの向きに戻ってください(もしカメラの回転アニメーションがあれば)
+            //いま、カメラはUIのLayerがScreenSpace-Cameraので注意
+            //*****************************************************
+            //presentBox.transform.rotation = Quaternion.Euler(0, 0, 0);
         }
         else
         {
@@ -227,12 +242,65 @@ public class NewPresentBoxManager : MonoBehaviour
         presentBox.SetActive(false);
         decoration.SetActive(true);
         imgPresentDecorTransform.DOAnchorPosY(0.0f, 1.0f).SetEase(Ease.OutBounce);
-        StartCoroutine(gameManager.BackGamePlay());
+        isIndicatePresent = false;
+
+        colorR = 1.0f;
+        colorG = 1.0f;
+        colorB = 1.0f;
+
+        txtPresentTime.transform.localScale = new Vector3(1, 1, 1);
+        txtPresentTime.color = new Color(1.0f, 1.0f, 1.0f);
+
+        presentBox.transform.localScale = Vector3.zero;
+        changeSpeed = 0.0f;
+        scaleChangeTime = 0.0f;
+        frameRotate = 0.0f;
+        frameSize = 0.0f;
+
+        gameManager.GetPresentFromBox();
+        //StartCoroutine(gameManager.BackGamePlay());
         //StartCoroutine(FinishOpenPresent());
         //yield return new WaitForSeconds(5.0f);
         //Debug.Log("入ってない...");
         //pnlPresentTime.SetActive(false);
         //pnlPresentScene.SetActive(false);
+        yield return null;
+    }
+
+    public IEnumerator NotGetPresent()
+    {
+        //RectTransform notGetPresent = newPresentBoxManager.presentBox.GetComponent<RectTransform>();
+        //float oriPosY = imgPresent.transform.position.y;
+
+        //Debug.Log("プレゼントを開くことができなかった！");
+        ////imgPresent.transform.DOShakeScale(2.0f, 0.15f, 4, 20);
+        ////yield return new WaitForSeconds(2.0f);
+        ////notGetPresent.DOAnchorPosY(oriPosY, 1.25f).SetEase(Ease.InBack);
+        //yield return new WaitForSeconds(1.25f);
+        //Debug.Log("入りました！");
+
+        //pnlPresentScene.SetActive(false);
+        //pnlPresentTime.SetActive(false);
+        ////StartCoroutine(gameManager.BackGamePlay());
+        isTime = false;
+        presentBox.transform.DOShakeScale(2.0f, 1.0f, 4, 20);
+        yield return new WaitForSeconds(2.0f);
+        isIndicatePresent = false;
+
+        colorR = 1.0f;
+        colorG = 1.0f;
+        colorB = 1.0f;
+
+        txtPresentTime.transform.localScale = new Vector3(1, 1, 1);
+        txtPresentTime.color = new Color(1.0f, 1.0f, 1.0f);
+
+        presentBox.SetActive(false);
+        presentBox.transform.localScale = Vector3.zero;
+        changeSpeed = 0.0f;
+        scaleChangeTime = 0.0f;
+        frameRotate = 0.0f;
+        frameSize = 0.0f;
+        gameManager.GetPresentFromBox(false);
         yield return null;
     }
 }

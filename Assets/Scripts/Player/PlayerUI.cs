@@ -5,19 +5,24 @@ using UnityEngine.UI;
 
 public class PlayerUI : MonoBehaviour
 {
-    //PlayerSkill playerSkill;
+    [field: Header("UI Energy")]
+    [field: SerializeField] Image imgMaskEnergy;
+
+    [field: Header("UI Skill")]
+    [field: SerializeField] Image imgMaskSkill;
+
+    [field: Header("UI Collected Present")]
+    [field: SerializeField] Text txtCollectedPresent;
+
+    [field: Header("Script References")]
     PlayerSkillCrushAndRun playerSkill;
     PlayerEnergy playerEnergy;
+    GameManager gameManager;
 
-    [Header("UI Energy")]
-    [SerializeField] Image imgMaskEnergy;
-
-    [Header("UI Skill")]
-    [SerializeField] Image imgMaskSkill;
-
-    [Header("UI Collected Present")]
-    [SerializeField] Text txtCollectedPresent;
-
+    //--------------------------------------------------------------------------------------
+    //  今は使わない（スキルゲージのアニメーションのため）
+    //  Energyやスキルが決めたらまだ使う
+    //--------------------------------------------------------------------------------------
     //[Header("UI Skill")]
     //[SerializeField] Image[] sliderSkillSeparator;    //スキル値を表示するUI
     //public Image imgMask;
@@ -39,22 +44,30 @@ public class PlayerUI : MonoBehaviour
 
     //[Header("Prefab")]
     //public GameObject prefUISkillSeparator;
+    //--------------------------------------------------------------------------------------
+
+
+    private void Awake()
+    {
+        playerSkill = GetComponent<PlayerSkillCrushAndRun>();
+        playerEnergy = GetComponent<PlayerEnergy>();
+        gameManager = FindObjectOfType<GameManager>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        playerSkill = GetComponent<PlayerSkillCrushAndRun>();
-        playerEnergy = GetComponent<PlayerEnergy>();
-        //InitUISkill();
+        UpdateCollectedPresentUI();
     }
 
     // Update is called once per frame
     void Update()
     {
-        //sliderSkill.value = playerSkill.GetSkillValueNow();
-        //AnimateSkillBar();
+
     }
 
+    //正規化する値を戻る
+    //UI Image->fillのため
     //Return 0.0f ~ 1.0f
     float GetImageFillValueNormalized(float value, float minValue, float maxValue)
     {
@@ -62,23 +75,31 @@ public class PlayerUI : MonoBehaviour
         return fillValueNormalize;
     }
 
+    //ENergyのゲージの値を更新する
     public void UpdateEnergyBarUI()
     {
         float fillValue = GetImageFillValueNormalized(playerEnergy.PlayerEnergyValue, playerEnergy.PlayerEnergyMin, playerEnergy.PlayerEnergyMax);
         imgMaskEnergy.fillAmount = fillValue;
     }
 
+    //Skillのゲージの値を更新する
     public void UpdateSkillBarUI()
     {
         float fillValue = GetImageFillValueNormalized(playerSkill.SkillValue, playerSkill.SkillValueMin, playerSkill.SkillValueMax);
         imgMaskSkill.fillAmount = fillValue;
     }
+
+
+    //もらったプレゼント箱数を更新する
     public void UpdateCollectedPresentUI()
     {
-
+        txtCollectedPresent.text = gameManager.PresentGetNum.ToString();
     }
 
     #region UI SKILL
+    //今は使わない
+    //SKillのゲージのアニメーション
+
 
     //void InitUISkill()
     //{

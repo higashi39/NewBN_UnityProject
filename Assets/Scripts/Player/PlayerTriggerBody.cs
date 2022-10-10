@@ -4,21 +4,11 @@ using UnityEngine;
 
 public class PlayerTriggerBody : MonoBehaviour
 {
+    [field: Header("Player Trigger Body Property")]
+    //‘‚Ì’†‚É‚¢‚é‚©‚Ç‚¤‚©i‘¬“x‚ðŒ¸‚ç‚·‚½‚ßj
+    //Player->PlayerTriggerBody‚É“\‚é
     [field: SerializeField] public bool IsInsideBush { set; get; } = false;
 
-    int bushCount = 0;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     private void OnTriggerEnter(Collider other)
     {

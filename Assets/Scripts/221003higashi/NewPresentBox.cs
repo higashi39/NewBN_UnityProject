@@ -35,11 +35,16 @@ public class NewPresentBox : MonoBehaviour
 
     //bool isClicked;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         newPresentBoxManager = FindObjectOfType<NewPresentBoxManager>();
         gameManager = FindObjectOfType<GameManager>();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
         //isClicked = false;
 
         //// 各オブジェクトの表示の初期化
@@ -163,23 +168,23 @@ public class NewPresentBox : MonoBehaviour
     //    StartCoroutine(newPresentBoxManager.FinishOpenPresent());
     //}
 
-    // デコレーションをゲットできなかったときの処理
-    IEnumerator NotGetPresent()
-    {
-        //RectTransform notGetPresent = newPresentBoxManager.presentBox.GetComponent<RectTransform>();
-        //float oriPosY = imgPresent.transform.position.y;
+    //// デコレーションをゲットできなかったときの処理
+    //IEnumerator NotGetPresent()
+    //{
+    //    //RectTransform notGetPresent = newPresentBoxManager.presentBox.GetComponent<RectTransform>();
+    //    //float oriPosY = imgPresent.transform.position.y;
 
-        Debug.Log("プレゼントを開くことができなかった！");
-        //imgPresent.transform.DOShakeScale(2.0f, 0.15f, 4, 20);
-        //yield return new WaitForSeconds(2.0f);
-        //notGetPresent.DOAnchorPosY(oriPosY, 1.25f).SetEase(Ease.InBack);
-        yield return new WaitForSeconds(1.25f);
-        Debug.Log("入りました！");
+    //    Debug.Log("プレゼントを開くことができなかった！");
+    //    //imgPresent.transform.DOShakeScale(2.0f, 0.15f, 4, 20);
+    //    //yield return new WaitForSeconds(2.0f);
+    //    //notGetPresent.DOAnchorPosY(oriPosY, 1.25f).SetEase(Ease.InBack);
+    //    yield return new WaitForSeconds(1.25f);
+    //    Debug.Log("入りました！");
 
-        newPresentBoxManager.pnlPresentScene.SetActive(false);
-        newPresentBoxManager.pnlPresentTime.SetActive(false);
-        gameManager.BackGamePlay();
-        yield return new WaitForSeconds(1.0f);
+    //    newPresentBoxManager.pnlPresentScene.SetActive(false);
+    //    newPresentBoxManager.pnlPresentTime.SetActive(false);
+    //    StartCoroutine(gameManager.BackGamePlay());
+    //    yield return new WaitForSeconds(1.0f);
 
-    }
+    //}
 }

@@ -4,21 +4,30 @@ using UnityEngine;
 
 public class SFXPlay : MonoBehaviour
 {
+    [field: Header("Component References")]
     AudioSource sound;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Awake()
     {
         sound = GetComponent<AudioSource>();
     }
 
-    private void OnEnable()
+    //SFXを再生する
+    //もし再生中場合、リセットしない
+    public void PlaySFXSound()
     {
-        sound.Play();
+        if (!sound.isPlaying)
+        {
+            sound.Play();
+        }
     }
 
-    private void OnDisable()
+    //SFXを止まる
+    public void StopSFXSound()
     {
-        sound.Stop();
+        if (sound.isPlaying)
+        {
+            sound.Stop();
+        }
     }
-
 }

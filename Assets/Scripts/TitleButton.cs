@@ -27,9 +27,10 @@ public class TitleButton : MonoBehaviour
 
     public void PushGameStart()
     {
+        SFXButton.Instance.PlayButtonPressSFX();
         SceneManager.LoadScene("PlayScene");
     }
-    
+
     public void PushHowToPlay()
     {
         pnlMainMenu.SetActive(false);
@@ -48,6 +49,6 @@ public class TitleButton : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }

@@ -6,47 +6,57 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    //ゲーム状態
     public enum GAME_STATUS
     {
         GAME_HOWTOPLAY,
         GAME_START, //もしアニメーション（321がやるなら最初にGAME_START）
-        //GAME_PAUSED,
+        GAME_PAUSED,
         GAME_NORMAL,
         GAME_PRESENT_APPEAR,
-        GAME_PRESENT_OPEN,
         GAME_ENDED,
     }
 
+    [field: Header("Game Settings")]
+    //1っ回ゲームの時間
+    [field: SerializeField] float GameTimeMax { set; get; } 
+
+    [field: Header("GameA Animation Settings")]
+    //Presentが出たら CanvasPresentAppearを出るまでの待つ時間
+    //その時はプレゼントがアニメーションがある(上へ行くと回転する)
+    //アニメーションの値がを設定するのはprefab/present/PresentBoxDisplay
+    [field: SerializeField] float AnimationPresentAppearWaitTime { set; get; } = 1.5f;
+
+
+    [field: Header("Game Properties")]
+    //今ゲームの状態
     [field: SerializeField] public GAME_STATUS GameStatus { private set; get; }
+    //今のゲーム時間
+    [field: SerializeField] float GameTime { set; get; }
+    //プレイヤーの最初座標（MapGeneratorで設定）
+    //ゲーム終了したらプレイヤーはこの座標に戻る
+    [field: SerializeField] public Vector3 PlayerFirstPos { set; get; }
+    //もらったプレゼントが数
+    [field: SerializeField] public int PresentGetNum { set; get; } = 0;
 
-    [Header("Canvas / UI")]
-    [SerializeField] GameObject canvas;
-    [SerializeField] GameObject pnlPause;
-    [SerializeField] Text txtTime;
-    //[SerializeField] Text txtPresentLeft;
-    [SerializeField] Text txtPause;
-    [SerializeField] GameObject pnlStart;
-    [SerializeField] Text txtStart;
-    [SerializeField] GameObject pnlEnd;
-    [SerializeField] Text txtEndTitle;
-    //[SerializeField] Text txtEndScore;
-    [SerializeField] Button btnEndMainMenu;
-    [SerializeField] Button btnEndRestart;
-
-
-
-    [Header("Game Settings")]
-    [SerializeField] float gameTimeMax; //1っ回ゲームの時間
-    [SerializeField] float gameTime;    //今の時間
-
-    [Header("Player References")]
-    PlayerMain playerMain;
-    Vector3 playerFirstPos;
-
+    [field: Header("Canvas / UI In Game")]
+    [field: SerializeField] GameObject canvas;
+    [field: SerializeField] GameObject pnlPause;
+    [field: SerializeField] Text txtTime;
+    [field: SerializeField] Text txtPause;
+    [field: SerializeField] GameObject pnlStart;
+    [field: SerializeField] Text txtStart;
+    [field: SerializeField] GameObject pnlEnd;
+    [field: SerializeField] Text txtEndTitle;
+    [field: SerializeField] GameObject pnlPresentGet;
+    [field: SerializeField] Text txtPresentGetNumEndGame;
+    [field: SerializeField] Button btnEndMainMenu;
+    [field: SerializeField] Button btnEndRestart;
 
     //-------------------------------
     // add higashi
     //-------------------------------
+    [field: Header("Canvas / UI Tutorial")]
     [SerializeField] GameObject imgBoard;
     [SerializeField] GameObject howToPlay;
     [Header("How To Play")]
@@ -58,50 +68,52 @@ public class GameManager : MonoBehaviour
     [SerializeField] Text txtBackPage;
     [SerializeField] int nextPageClickNum;
 
-    //[Header("About Present")]
-
-    [Header("Another References")]
-    // プレゼントのスクリプト
-    PresentBoxManager presentBoxManager;        // 以前のPresentManager
+    [field: Header("Script References")]
+    PlayerMain playerMain;
+    PlayerUI playerUI;
     NewPresentBoxManager newPresentBoxManager;
+
+    private void Awake()
+    {
+        playerMain = FindObjectOfType<PlayerMain>();
+        playerUI = FindObjectOfType<PlayerUI>();
+        newPresentBoxManager = FindObjectOfType<NewPresentBoxManager>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        //  ポーズパネルはfalseにする
-        //-------------------------------
-        // edit higashi
-        //-------------------------------
         // ポーズは無しにするので、これを遊び方に使用させてもらいます
         pnlPause.SetActive(true);
-        //  
+
         pnlStart.SetActive(false);
         pnlEnd.SetActive(false);
         txtEndTitle.gameObject.SetActive(false);
-        //txtEndScore.gameObject.SetActive(false);
         btnEndMainMenu.gameObject.SetActive(false);
         btnEndRestart.gameObject.SetActive(false);
-        //  ゲーム時間設定
-        gameTime = gameTimeMax;
-        //  プレイヤー参照
-        playerMain = FindObjectOfType<PlayerMain>();
-        playerFirstPos = playerMain.transform.position;
+        pnlPresentGet.SetActive(false);
 
-        //StartCoroutine(StartGameAnimation());
+        //ゲーム時間設定
+        GameTime = GameTimeMax;
+
+        //プレイヤーの入力をfalseにする
+        playerMain.SetPlayerInputDisabled();
+
+        //時間のUIを合わせた書式にする
+        FormatTimeText();
 
         //-------------------------------
         // add higashi
         //-------------------------------
+        HowToPlay();
         imgBoard.SetActive(true);
         howToPlay.gameObject.SetActive(true);
-        //btnToGameStart.gameObject.SetActive(true);
-        //PressBtnToGameStart();
         GameStatus = GAME_STATUS.GAME_HOWTOPLAY;
         txtNextPage.text = "次へ";
         nextPageClickNum = 0;
-        newPresentBoxManager = FindObjectOfType<NewPresentBoxManager>();
         txtBackPage.text = "戻る";
         btnBackPage.gameObject.SetActive(false);
+
     }
 
     // Update is called once per frame
@@ -109,26 +121,19 @@ public class GameManager : MonoBehaviour
     {
         switch (GameStatus)
         {
-            case GAME_STATUS.GAME_HOWTOPLAY:
-                {
-                    HowToPlay();
-                }
-                break;
-
             case GAME_STATUS.GAME_NORMAL:
                 {
-
-                    gameTime -= Time.deltaTime;
-                    if (gameTime <= 0.0f)
+                    GameTime -= Time.deltaTime;
+                    if (GameTime <= 0.0f)
                     {
                         //--------------------
                         //ゲーム終了
                         //--------------------
-                        gameTime = 0.0f;
-                        ChangeGameStatus(GAME_STATUS.GAME_ENDED);
-                        playerMain.SetPlayerInputEnable(false);
+                        GameTime = 0.0f;
+                        GameStatus = GAME_STATUS.GAME_ENDED;
+                        playerMain.SetPlayerInputDisabled();
                         StartCoroutine(EndGameAnimation());
-                        playerMain.transform.position = playerFirstPos;
+                        playerMain.transform.position = PlayerFirstPos;
                     }
                     FormatTimeText();
                 }
@@ -137,49 +142,24 @@ public class GameManager : MonoBehaviour
 
     }
 
-    //  ゲームステータスを変更する
-    public void ChangeGameStatus(GAME_STATUS status)
-    {
-        GameStatus = status;
-    }
-
+    //GameStatusはGAME_STATUS.GAME_PRESENT_APPEARにする
+    //プレイヤーの入力をoffにする
+    //UIを隠して、プレゼント箱現れたアニメションを呼ぶ
     public void SetGameStatusPresentAppear()
     {
         GameStatus = GAME_STATUS.GAME_PRESENT_APPEAR;
-        ChangeGameStatus(GameManager.GAME_STATUS.GAME_PRESENT_APPEAR);
-        playerMain.SetPlayerInputEnable(false);
+        playerMain.SetPlayerInputDisabled();
         SetEnableAllUI(false);
-
+        StartCoroutine(BoxAppearAnimation());
     }
 
-
-    #region UI
-    //　全ActiveUIを見せるかどうか
-    public void SetEnableAllUI(bool isEnable = true)
-    {
-        canvas.SetActive(isEnable);
-    }
-    //  gameTimeの書式
-    void FormatTimeText()
-    {
-        // .ToString("00") -> 00 80 60
-        string timeFormat = gameTime.ToString("00");
-        txtTime.text = timeFormat;
-    }
-    //  残りプレゼント数のUIを更新する
-    public void UpdateUIPresentLeft(int presentLeft)
-    {
-        //txtPresentLeft.text = "残りプレゼント数：" + presentLeft;
-    }
-    //  ポーズボタン押す関数
-
+    #region Animation
+    //ゲームスタートアニメション
     IEnumerator StartGameAnimation()
     {
-        FormatTimeText();
-        playerMain.SetPlayerInputEnable(false);
         howToPlay.SetActive(false);
-        imgBoard.SetActive(false);
         pnlPause.SetActive(false);
+
         GameStatus = GAME_STATUS.GAME_START;
         pnlStart.SetActive(true);
         txtStart.text = "3";
@@ -191,59 +171,105 @@ public class GameManager : MonoBehaviour
         txtStart.text = "GO";
         yield return new WaitForSeconds(1.0f);
         pnlStart.SetActive(false);
-        playerMain.SetPlayerInputEnable();
+        playerMain.SetPlayerInputDisabled(false);
         GameStatus = GAME_STATUS.GAME_NORMAL;
     }
-
+    //ゲーム終了アニメション
     IEnumerator EndGameAnimation()
     {
         pnlEnd.SetActive(true);
         txtEndTitle.gameObject.SetActive(true);
         yield return new WaitForSeconds(1.0f);
-        //txtEndScore.text = "スコア：" + playerMain.GetPlayerScore().ToString();
-        //txtEndScore.gameObject.SetActive(true);
+        txtPresentGetNumEndGame.text = PresentGetNum.ToString();
+        pnlPresentGet.SetActive(true);
         yield return new WaitForSeconds(1.5f);
         btnEndMainMenu.gameObject.SetActive(true);
         btnEndRestart.gameObject.SetActive(true);
     }
+    //プレゼント箱が現れたアニメション
+    IEnumerator BoxAppearAnimation()
+    {
+        yield return new WaitForSeconds(AnimationPresentAppearWaitTime);
+        PresentBoxDisplay presentBoxDisplay = FindObjectOfType<PresentBoxDisplay>();
+        presentBoxDisplay.SetAnimationWait();
 
+        newPresentBoxManager.pnlPresentScene.SetActive(true);
+        newPresentBoxManager.presentSceneSetActive = true;
+    }
+    #endregion
+
+    #region Get Present From Box
+    //プレゼントをもらうかどうか（PresentSceneから判断）
+    public void GetPresentFromBox(bool isGet = true)
+    {
+        if (isGet)
+        {
+            ++PresentGetNum;
+            playerUI.UpdateCollectedPresentUI();
+        }
+        StartCoroutine(BackGamePlay());
+    }
+    #endregion
+
+    #region UI Handler
+    //　全ActiveUIを見せるかどうか
+    public void SetEnableAllUI(bool isEnable = true)
+    {
+        canvas.SetActive(isEnable);
+    }
+    //  gameTimeの書式
+    void FormatTimeText()
+    {
+        // .ToString("00") -> 00 80 60
+        string timeFormat = GameTime.ToString("00");
+        txtTime.text = timeFormat;
+    }
+    #endregion
 
     #region Button Function
-    //public void PressBtnPause()
-    //{
-    //    //ポーズする
-    //    if (GameStatus == GAME_STATUS.GAME_NORMAL)
-    //    {
-    //        Time.timeScale = 0;
-    //        pnlPause.SetActive(true);
-    //        ChangeGameStatus(GAME_STATUS.GAME_PAUSED);
-    //        txtPause.text = "Resume";
-    //        return;
-    //    }
+    //  ポーズボタン押す関数
+    public void PressBtnPause()
+    {
+        SFXButton.Instance.PlayButtonPressSFX();
+        //ポーズする
+        if (GameStatus == GAME_STATUS.GAME_NORMAL)
+        {
+            Time.timeScale = 0;
+            pnlPause.SetActive(true);
+            GameStatus = GAME_STATUS.GAME_PAUSED;
+            txtPause.text = "Resume";
+            return;
+        }
 
-    //    //ゲーム続き
-    //    if (GameStatus == GAME_STATUS.GAME_PAUSED)
-    //    {
-    //        ChangeGameStatus(GAME_STATUS.GAME_NORMAL);
-    //        pnlPause.SetActive(false);
-    //        Time.timeScale = 1;
-    //        txtPause.text = "Pause";
-    //        return;
-    //    }
-    //}
+        //ゲーム続き
+        if (GameStatus == GAME_STATUS.GAME_PAUSED)
+        {
+            GameStatus = GAME_STATUS.GAME_NORMAL;
+            pnlPause.SetActive(false);
+            Time.timeScale = 1;
+            txtPause.text = "Pause";
+            return;
+        }
+    }
 
+    //メインメニューに戻る
+    //pnlEndのボタンに設定する
     public void PressBtnMainMenu()
     {
+        SFXButton.Instance.PlayButtonPressSFX();
         SceneManager.LoadScene("MainMenu");
     }
 
+    //ゲームをリセットする
+    //pnlEndのボタンに設定する
     public void PressBtnRestart()
     {
+        SFXButton.Instance.PlayButtonPressSFX();
         SceneManager.LoadScene("PlayScene");
     }
     #endregion
 
-    #endregion
+
 
     void HowToPlay()
     {
@@ -279,7 +305,7 @@ public class GameManager : MonoBehaviour
                 txtExplainSubTitle.text = "＜ゲージの説明＞ ギャー君のスキル";
                 txtExplainDetail.text = "草を刈っていると黄色のスキルゲージがたまるよ" +
                     "\nゲージがいっぱいになった状態で右クリックを押すと、\nスキルが発動されて、ギャー君のスピードがあがるよ！" +
-                    "\n上手く使って、たくさんのプレゼントを見つけよう！";
+                    "\n一気に草を刈ることができるから、上手く使って、たくさんのプレゼントを見つけよう！";
                 btnNextPage.gameObject.SetActive(true);
                 btnNextPage.transform.localPosition = new Vector3(0, -205, 0);
                 txtNextPage.text = "スタート";
@@ -292,24 +318,35 @@ public class GameManager : MonoBehaviour
 
     public void ClickNextPage()
     {
+        SFXButton.Instance.PlayButtonPressSFX();
         nextPageClickNum++;
+        HowToPlay();
     }
 
     public void ClickBackPage()
     {
+        SFXButton.Instance.PlayButtonPressSFX();
         nextPageClickNum--;
+        HowToPlay();
     }
 
     public IEnumerator BackGamePlay()
     {
         yield return new WaitForSeconds(3.0f);
+
         newPresentBoxManager.decoration.SetActive(false);
         newPresentBoxManager.pnlPresentTime.SetActive(false);
         newPresentBoxManager.pnlPresentScene.SetActive(false);
-        ChangeGameStatus(GAME_STATUS.GAME_NORMAL);
-        Time.timeScale = 1;
-        playerMain.SetPlayerInputEnable(true);
+
+        PresentBoxDisplay presentBoxDisplay = FindObjectOfType<PresentBoxDisplay>();
+        presentBoxDisplay.SetAnimationDisappear();
+        playerMain.SetPlayerInputDisabled(false);
         SetEnableAllUI(true);
+        GameStatus = GAME_STATUS.GAME_NORMAL;
+
         Debug.Log("変わるよ");
     }
+
+
+
 }

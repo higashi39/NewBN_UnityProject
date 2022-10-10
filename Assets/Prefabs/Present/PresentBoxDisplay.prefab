@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8428462472116441933
+--- !u!1 &1925991490417504123
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8428462472116441922}
-  - component: {fileID: 8428462472116441921}
-  - component: {fileID: 8428462472116441920}
-  - component: {fileID: 8428462472116441934}
+  - component: {fileID: 1925991490417504118}
+  - component: {fileID: 1925991490417504117}
+  - component: {fileID: 1925991490417504116}
+  - component: {fileID: 2701629779751364322}
   m_Layer: 0
   m_Name: PresentBoxDisplay
   m_TagString: Untagged
@@ -19,13 +19,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8428462472116441922
+--- !u!4 &1925991490417504118
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8428462472116441933}
+  m_GameObject: {fileID: 1925991490417504123}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -34,21 +34,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8428462472116441921
+--- !u!33 &1925991490417504117
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8428462472116441933}
+  m_GameObject: {fileID: 1925991490417504123}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &8428462472116441920
+--- !u!23 &1925991490417504116
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8428462472116441933}
+  m_GameObject: {fileID: 1925991490417504123}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -84,17 +84,52 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8428462472116441934
+--- !u!114 &2701629779751364322
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8428462472116441933}
+  m_GameObject: {fileID: 1925991490417504123}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19e182a1ece35ce4db51d5a0287b4e7d, type: 3}
+  m_Script: {fileID: 11500000, guid: 3f2db31e330c6584a81a83ded07b0eef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <RotationSpeed>k__BackingField: 60
-  <UpSpeed>k__BackingField: 1.65
+  <RotationSpeed>k__BackingField: 120
+  <UpSpeed>k__BackingField: 1
+  <SizeCurve>k__BackingField:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0044937134
+      value: 0.9897461
+      inSlope: 1.5519193
+      outSlope: 1.5519193
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.17089872
+    - serializedVersion: 3
+      time: 0.23982236
+      value: 1.2765234
+      inSlope: -0.10163177
+      outSlope: -0.10163177
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.20247231
+      outWeight: 0.21676403
+    - serializedVersion: 3
+      time: 0.70088035
+      value: 0.0059538204
+      inSlope: -7.5760636
+      outSlope: -7.5760636
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.04825823
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  <PresentAnimation>k__BackingField: 0
+  <RotationSpeedOri>k__BackingField: 7

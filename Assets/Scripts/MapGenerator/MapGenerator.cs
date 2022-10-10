@@ -81,36 +81,36 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     //マップの大きさ・広さ
-    [Header("Map Setting")]
-    [SerializeField] int mapX;
-    [SerializeField] int mapZ;
+    [field: Header("Map Setting")]
+    [field: SerializeField] int mapX;
+    [field: SerializeField] int mapZ;
 
-    [Header("Present Settings")]
-    [SerializeField] int presentNum;        //本物
-    [SerializeField] int presentHazureNum;   //外れ
-    [SerializeField] int presentTotal;      //全部プレゼント数
+    [field: Header("Present Settings")]
+    [field: SerializeField] int presentNum;        //本物
+    [field: SerializeField] int presentHazureNum;   //外れ
+    [field: SerializeField] int presentTotal;      //全部プレゼント数
 
     //各マスの飾り設定
     //decorGrassは最大数は100
     //decorFlower,decorBushes,decorStump,decorSmallRockの合計は最大数は25
     //decorBushの数はpresentTotalより多いに設定してください。
-    [Header("Decoration Settings")]
-    [SerializeField] GardenDecoration decorGrass;
-    [SerializeField] GardenDecoration decorFlower;
-    [SerializeField] GardenDecoration decorBushes;
-    [SerializeField] GardenDecoration decorStump;
-    [SerializeField] GardenDecoration decorSmallRock;
+    [field: Header("Decoration Settings")]
+    [field: SerializeField] GardenDecoration decorGrass;
+    [field: SerializeField] GardenDecoration decorFlower;
+    [field: SerializeField] GardenDecoration decorBushes;
+    [field: SerializeField] GardenDecoration decorStump;
+    [field: SerializeField] GardenDecoration decorSmallRock;
 
     //プレハブ設定
-    [Header("Prefab Settings")]
-    [SerializeField] GameObject prefFloorGrass;
-    [SerializeField] GameObject prefFloorHouse;
-    [SerializeField] GameObject prefPresent;
-    [SerializeField] GameObject prefPresentHazure;
-    [SerializeField] GameObject prefFence;
-    [SerializeField] GameObject prefFencePost;
-    [SerializeField] GameObject prefHouse;
-    [SerializeField] GameObject prefChargingZone;
+    [field: Header("Prefab Settings")]
+    [field: SerializeField] GameObject prefFloorGrass;
+    [field: SerializeField] GameObject prefFloorHouse;
+    [field: SerializeField] GameObject prefPresent;
+    [field: SerializeField] GameObject prefPresentHazure;
+    [field: SerializeField] GameObject prefFence;
+    [field: SerializeField] GameObject prefFencePost;
+    [field: SerializeField] GameObject prefHouse;
+    [field: SerializeField] GameObject prefChargingZone;
 
 
     //Floor（床）とHouse（家）の配列
@@ -131,51 +131,57 @@ public class MapGenerator : MonoBehaviour
 
     //プレゼントやマップの親物体
     [Header("Game Object Parent")]
-    [SerializeField] GameObject mapParent;
-    [SerializeField] GameObject presentParent;
-    [SerializeField] GameObject extraZoneParent;
-    [SerializeField] GameObject floorGrassParent;
-    [SerializeField] GameObject fenceParent;
-    [SerializeField] GameObject coverZoneParent;
+    [field: SerializeField] GameObject mapParent;
+    [field: SerializeField] GameObject presentParent;
+    [field: SerializeField] GameObject extraZoneParent;
+    [field: SerializeField] GameObject floorGrassParent;
+    [field: SerializeField] GameObject fenceParent;
+    [field: SerializeField] GameObject coverZoneParent;
 
     //エクストラエリア
     [Header("Extra Zone")]
     const float extraZoneSize = 1.0f;
     const float extraZoneHalfSize = extraZoneSize * 0.5f;
     const float extraZoneDoubleSize = extraZoneSize * 2.0f;
-    [SerializeField] GameObject extraZoneLeft;
-    [SerializeField] GameObject extraZoneRight;
-    [SerializeField] GameObject extraZoneTop;
-    [SerializeField] GameObject extraZoneBottom;
+    [field: SerializeField] GameObject extraZoneLeft;
+    [field: SerializeField] GameObject extraZoneRight;
+    [field: SerializeField] GameObject extraZoneTop;
+    [field: SerializeField] GameObject extraZoneBottom;
 
     //見えない壁（プレイヤーは庭の中から出ないために）
-    [Header("Invisible Wall")]
+    [field: Header("Invisible Wall")]
     const float invisibleWallSize = 1.0f;
     const float invisibleWallHalfSize = invisibleWallSize * 0.5f;
-    [SerializeField] GameObject wallLeft;
-    [SerializeField] GameObject wallRight;
-    [SerializeField] GameObject wallTop;
-    [SerializeField] GameObject wallBottom;
+    [field: SerializeField] GameObject wallLeft;
+    [field: SerializeField] GameObject wallRight;
+    [field: SerializeField] GameObject wallTop;
+    [field: SerializeField] GameObject wallBottom;
 
-    [Header("Placing Player")]
-    [SerializeField] float playerClearObjectDistance = 10.0f;
-    Vector3 playerFirstLoc;
+    [field: Header("Placing Player")]
+    [field: SerializeField] float playerClearObjectDistance = 10.0f;
+    [field: SerializeField] Vector3 PlayerFirstLoc { set; get; }
 
-    [Header("Fence Settings")]
+    [field: Header("Fence Settings")]
     Vector3 fenceFirstPos = new Vector3(-1.0f, 0.0f, -1.0f);
     const float fenceSize = 2.0f;
-    const float fenctNextRot = 90.0f;
-    int fenceNum;
 
-    [Header("House Settings")]
+    [field: Header("House Settings")]
     const float houseSize = 6.0f;
     const float houseSizeHalf = houseSize * 0.5f;
-    int removeFenceNum = 3;
+    const int removeFenceNum = 3;
     int removeFenceCounter = 0;
     bool isRemoveFence = false;
 
-    [Header("Particle Plane")]
-    [SerializeField] GameObject particlePlane;
+    [field: Header("Particle Plane")]
+    [field: SerializeField] GameObject particlePlane;
+
+    [field: Header("Script References")]
+    GameManager gameManager;
+
+    private void Awake()
+    {
+        gameManager = FindObjectOfType<GameManager>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -369,11 +375,13 @@ public class MapGenerator : MonoBehaviour
         float rot = Random.Range(0.0f, 360.0f);
         return rot;
     }
+
     float GetRandomRotationMultipleOf90()
     {
         float[] rot = { 0.0f, 90.0f, 180.0f, 270.0f };
         return rot[Random.Range(0, rot.Length)];
     }
+
     Vector3 GetRandomVectorRotationY360()
     {
         Vector3 rot = new Vector3();
@@ -702,7 +710,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     GameObject floor = GenerateFloorGrass();
                     Vector3 newPos = new Vector3();
-                    newPos.x = (mapZ + 1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                    newPos.x = mapZ * floorGrassDistance + extraZoneSize - firstPosGrassX;
                     newPos.z = firstPosGrassZ + (i * floorGrassDistance);
 
                     floor.transform.position = newPos;
@@ -759,7 +767,7 @@ public class MapGenerator : MonoBehaviour
             {
                 GameObject floor = GenerateFloorGrass();
                 Vector3 newPos = new Vector3();
-                newPos.x = (mapZ + 1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                newPos.x = mapZ * floorGrassDistance + extraZoneSize - firstPosGrassX;
                 newPos.z = -(firstPosGrassZ + extraZoneSize);
 
                 floor.transform.position = newPos;
@@ -809,7 +817,7 @@ public class MapGenerator : MonoBehaviour
             newPos.x += i * fenceSize;
             newPos.z = (mapZ * floorGrassSize * 2.0f) + extraZoneSize;
 
-            if (newPos.x == playerFirstLoc.x - houseSizeHalf)
+            if (newPos.x == PlayerFirstLoc.x - houseSizeHalf)
             {
                 Vector3 fencePostPos = new Vector3(0.0f, 0.0f, 0.0f);
                 fencePostPos.x = newPos.x;
@@ -865,7 +873,8 @@ public class MapGenerator : MonoBehaviour
         newPlayerPos.x = mapX * floorGrassSize;
         newPlayerPos.y = player.position.y;
         newPlayerPos.z = mapZ * floorGrassDistance - firstPosZOffset;
-        playerFirstLoc = newPlayerPos;
+        PlayerFirstLoc = newPlayerPos;
+        gameManager.PlayerFirstPos = PlayerFirstLoc;
 
         GameObject[] objBush = GameObject.FindGameObjectsWithTag("Bush");
         GameObject[] objStump = GameObject.FindGameObjectsWithTag("Stump");
@@ -930,58 +939,58 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region Present Generator
-    void PresentGenerator()
-    {
-        Bushes[] objBush = FindObjectsOfType<Bushes>();
-        int bushNum = objBush.Length;
-        int[] arrRandom = new int[bushNum];
-        int nowRandomCounter = 0;
-        for (int i = 0; i < bushNum; ++i)
-        {
-            arrRandom[i] = i;
-        }
+    //void PresentGenerator()
+    //{
+    //    Bushes[] objBush = FindObjectsOfType<Bushes>();
+    //    int bushNum = objBush.Length;
+    //    int[] arrRandom = new int[bushNum];
+    //    int nowRandomCounter = 0;
+    //    for (int i = 0; i < bushNum; ++i)
+    //    {
+    //        arrRandom[i] = i;
+    //    }
 
-        for (int i = 0; i < bushNum; ++i)
-        {
-            int randomIndex = Random.Range(0, bushNum);
-            int tmpVal = arrRandom[i];
-            arrRandom[i] = arrRandom[randomIndex];
-            arrRandom[randomIndex] = tmpVal;
-        }
+    //    for (int i = 0; i < bushNum; ++i)
+    //    {
+    //        int randomIndex = Random.Range(0, bushNum);
+    //        int tmpVal = arrRandom[i];
+    //        arrRandom[i] = arrRandom[randomIndex];
+    //        arrRandom[randomIndex] = tmpVal;
+    //    }
 
-        PresentBoxManager presentBoxManager = FindObjectOfType<PresentBoxManager>();
-        presentBoxManager.Init(presentNum);
-        //Generete Present Box
-        for (int i = 0; i < presentNum; ++i)
-        {
-            GameObject present = Instantiate(prefPresent, presentParent.transform);
-            Transform bushPresentLoc = objBush[arrRandom[nowRandomCounter]].transform.Find("PresentLocation");
-            Vector3 newPos = bushPresentLoc.position;
-            present.transform.position = newPos;
+    //    PresentBoxManager presentBoxManager = FindObjectOfType<PresentBoxManager>();
+    //    presentBoxManager.Init(presentNum);
+    //    //Generete Present Box
+    //    for (int i = 0; i < presentNum; ++i)
+    //    {
+    //        GameObject present = Instantiate(prefPresent, presentParent.transform);
+    //        Transform bushPresentLoc = objBush[arrRandom[nowRandomCounter]].transform.Find("PresentLocation");
+    //        Vector3 newPos = bushPresentLoc.position;
+    //        present.transform.position = newPos;
 
-            PresentBox presentBox = present.GetComponent<PresentBox>();
-            presentBox.presentType = PresentBox.PRESENT_TYPE.PRESENT;
-            presentBoxManager.AddPresentListRef(presentBox);
+    //        PresentBox presentBox = present.GetComponent<PresentBox>();
+    //        presentBox.presentType = PresentBox.PRESENT_TYPE.PRESENT;
+    //        presentBoxManager.AddPresentListRef(presentBox);
 
-            ++nowRandomCounter;
-        }
+    //        ++nowRandomCounter;
+    //    }
 
-        //Generate Present Box Hazure
-        for (int i = 0; i < presentHazureNum; ++i)
-        {
-            GameObject present = Instantiate(prefPresentHazure, presentParent.transform);
-            Transform bushPresentLoc = objBush[arrRandom[nowRandomCounter]].transform.Find("PresentLocation");
-            Vector3 newPos = bushPresentLoc.position;
-            newPos.y += 0.6f;
-            present.transform.position = newPos;
+    //    //Generate Present Box Hazure
+    //    for (int i = 0; i < presentHazureNum; ++i)
+    //    {
+    //        GameObject present = Instantiate(prefPresentHazure, presentParent.transform);
+    //        Transform bushPresentLoc = objBush[arrRandom[nowRandomCounter]].transform.Find("PresentLocation");
+    //        Vector3 newPos = bushPresentLoc.position;
+    //        newPos.y += 0.6f;
+    //        present.transform.position = newPos;
 
-            PresentBox presentBox = present.GetComponent<PresentBox>();
-            presentBox.presentType = PresentBox.PRESENT_TYPE.HAZURE;
+    //        PresentBox presentBox = present.GetComponent<PresentBox>();
+    //        presentBox.presentType = PresentBox.PRESENT_TYPE.HAZURE;
 
-            ++nowRandomCounter;
-        }
+    //        ++nowRandomCounter;
+    //    }
 
-    }
+    //}
     #endregion
 
     #region Particle Plane

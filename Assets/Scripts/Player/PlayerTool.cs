@@ -4,22 +4,20 @@ using UnityEngine;
 
 public class PlayerTool : MonoBehaviour
 {
-    [Header("References")]
+    [field: Header("Prefab Particle")]
+    [field: SerializeField] GameObject prefParticleLeaf;
+
+    [field: Header("Player Tool Properties")]
+    //今草を刈っているかどうか
+    [field: SerializeField] public bool IsToolCuttingGrass { private set; get; }
+    //今草切の中の草の参照
+    [field: SerializeField] SingleBush bushesTarget;
+
+    [field: Header("Script References")]
     [field: SerializeField] PlayerEnergy playerEnergy;
     [field: SerializeField] PlayerSkillCrushAndRun playerSkill;
     [field: SerializeField] PlayerTriggerBody playerTriggerBody;
     [field: SerializeField] PresentGenerator presentGenerator;
-
-    [Header("Prefab Particle")]
-    [field: SerializeField] GameObject prefParticleLeaf;
-
-    [field: Header("Particle Plane")]
-    [field: SerializeField] GameObject particlePlane;
-
-    [field: SerializeField] public bool IsToolCuttingGrass { private set; get; } = false;
-
-    //Target
-    SingleBush bushesTarget;
 
     void Awake()
     {
@@ -29,22 +27,23 @@ public class PlayerTool : MonoBehaviour
         presentGenerator = FindObjectOfType<PresentGenerator>();
     }
 
-    // Start is called befores the first frame update
-    void Start()
-    {
-
-    }
-
     // Update is called once per frame
     void Update()
     {
+        //草がない時
         if (bushesTarget == null)
         {
             return;
         }
+
+        //値初期化
         IsToolCuttingGrass = false;
         bool isDestroyBush = false;
 
+        //スキル使っているかどうか
+        //使ったら草がすぐ刈った
+        //しない場合プレイヤーが止まって草を刈る
+        //刈ったら isDestroyBushの値trueになる
         if (playerSkill.IsUseSkill)
         {
             isDestroyBush = bushesTarget.CutBushes(true);
@@ -55,30 +54,32 @@ public class PlayerTool : MonoBehaviour
             isDestroyBush = bushesTarget.CutBushes();
         }
 
+        //刈った草が破壊したら
         if (isDestroyBush)
         {
+            //プレゼントを生成
             presentGenerator.GeneratePresent(bushesTarget.transform.position);
+            //スキル値をもらう
             playerSkill.AddSkillValue(bushesTarget.SkillGetValue);
+            //草刈りをしない
             IsToolCuttingGrass = false;
+            //Energyも使わないとSFXも消す
+            playerEnergy.IsUseEnergy = false;
+            playerEnergy.SfxPlayCuttingGrass.StopSFXSound();
+
+            //草の中にいない
             playerTriggerBody.IsInsideBush = false;
-            //Particle
+
+            //Particleを作る
+            //Particleは3秒後、自動的に自分で破壊する
             GameObject obj = Instantiate(prefParticleLeaf);
             Vector3 newPos = bushesTarget.transform.position;
             newPos.y += 1.0f;
-            //newPos += transform.forward * 2.0f;
             obj.transform.position = newPos;
-
-            //ParticleSystem par = obj.GetComponent<ParticleSystem>();
-            //par.collision.AddPlane(particlePlane.transform);
-            //par.Play();
             Destroy(obj, 3.0f);
-
-            //bushes.CheckDestroyBush();
-            //IsToolInsideBush = false;
-            //presentManager.GeneratePresent(other.transform.position);
-            //Destroy(other.gameObject);
         }
 
+        //草の参照をリセット
         bushesTarget = null;
     }
 
