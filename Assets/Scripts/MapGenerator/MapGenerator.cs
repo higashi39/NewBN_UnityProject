@@ -710,7 +710,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     GameObject floor = GenerateFloorGrass();
                     Vector3 newPos = new Vector3();
-                    newPos.x = mapZ * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                    newPos.x = (mapZ+1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
                     newPos.z = firstPosGrassZ + (i * floorGrassDistance);
 
                     floor.transform.position = newPos;
@@ -767,7 +767,7 @@ public class MapGenerator : MonoBehaviour
             {
                 GameObject floor = GenerateFloorGrass();
                 Vector3 newPos = new Vector3();
-                newPos.x = mapZ * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                newPos.x = (mapZ+1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
                 newPos.z = -(firstPosGrassZ + extraZoneSize);
 
                 floor.transform.position = newPos;

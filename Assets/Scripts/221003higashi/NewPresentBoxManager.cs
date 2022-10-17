@@ -220,9 +220,9 @@ public class NewPresentBoxManager : MonoBehaviour
         }
 
         // サイズが最大まで行ったら
-        if (frameSize > 8.0f)
+        if (frameSize > 5.3f)
         {
-            frameSize = 8.0f;
+            frameSize = 5.3f;
 
             // 回転を止めるためにisRotateをfalseにする
             frameRotate -= 0.1f;
