@@ -15,7 +15,9 @@ public class TitleButton : MonoBehaviour
     [SerializeField] Button btnBack;
     [SerializeField] Text txtTitle;
 
-    [SerializeField] GameObject boardHowToPlay;
+    [SerializeField] GameObject cmrMainCamara;
+    public float cameraRotateSpeed = 3.0f;
+    bool isRotateX = false;
 
     // Start is called before the first frame update
     void Start()
@@ -25,30 +27,30 @@ public class TitleButton : MonoBehaviour
         //boardHowToPlay.SetActive(false);
     }
 
-    public void PushGameStart()
+    //public void PushGameStart()
+    //{
+    //    //SceneManager.LoadScene("PlayScene");
+    //}
+
+    public void PushStart()
     {
         SFXButton.Instance.PlayButtonPressSFX();
-        SceneManager.LoadScene("PlayScene");
+        btnStart.gameObject.SetActive(false);
+        //cmrMainCamara.transform.rotation = Quaternion.Euler(-30, 0, 0);
+        isRotateX = true;
     }
-
-    public void PushHowToPlay()
-    {
-        pnlMainMenu.SetActive(false);
-        pnlHowToPlay.SetActive(true);
-        boardHowToPlay.SetActive(true);
-    }
-
-    public void PushBack()
-    {
-        pnlHowToPlay.SetActive(false);
-        boardHowToPlay.SetActive(false);
-        pnlMainMenu.SetActive(true);
-    }
-
 
     // Update is called once per frame
     void Update()
     {
-
+        if (isRotateX)
+        {
+            cameraRotateSpeed-= 0.3f;
+            cmrMainCamara.transform.rotation = Quaternion.Euler(cameraRotateSpeed, 0, 0);
+            if(cameraRotateSpeed < -120)
+            {
+                isRotateX = false;
+            }
+        }
     }
 }
