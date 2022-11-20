@@ -90,6 +90,9 @@ public class MapGenerator : MonoBehaviour
     [field: SerializeField] int presentHazureNum;   //外れ
     [field: SerializeField] int presentTotal;      //全部プレゼント数
 
+    [field: Header("Generator Settings")]
+    [field: SerializeField] int generatorMaxNum;
+
     //各マスの飾り設定
     //decorGrassは最大数は100
     //decorFlower,decorBushes,decorStump,decorSmallRockの合計は最大数は25
@@ -111,6 +114,7 @@ public class MapGenerator : MonoBehaviour
     [field: SerializeField] GameObject prefFencePost;
     [field: SerializeField] GameObject prefHouse;
     [field: SerializeField] GameObject prefChargingZone;
+    [field: SerializeField] GameObject prefPowerGenerator;
 
 
     //Floor（床）とHouse（家）の配列
@@ -137,6 +141,7 @@ public class MapGenerator : MonoBehaviour
     [field: SerializeField] GameObject floorGrassParent;
     [field: SerializeField] GameObject fenceParent;
     [field: SerializeField] GameObject coverZoneParent;
+    [field: SerializeField] GameObject powerGeneratorParent;
 
     //エクストラエリア
     [Header("Extra Zone")]
@@ -160,6 +165,11 @@ public class MapGenerator : MonoBehaviour
     [field: Header("Placing Player")]
     [field: SerializeField] float playerClearObjectDistance = 10.0f;
     [field: SerializeField] Vector3 PlayerFirstLoc { set; get; }
+
+    [field: Header("Placing Generator")]
+    [field: SerializeField] float minGeneratorSeperateDistance = 60.0f;
+    [field: SerializeField] float generatorClearObjectDistance = 6.0f;
+
 
     [field: Header("Fence Settings")]
     Vector3 fenceFirstPos = new Vector3(-1.0f, 0.0f, -1.0f);
@@ -196,6 +206,7 @@ public class MapGenerator : MonoBehaviour
         PlacingPlayer();
         PlacingHouseAndChargeZone();
         GenerateFence();
+        PlacingPowerGenerator();
         //PresentGenerator();
         SetParticlePlane();
     }
@@ -321,7 +332,7 @@ public class MapGenerator : MonoBehaviour
         //Top Side
         {
             Vector3 newSize = new Vector3();
-            newSize.x = mapX * floorGrassDistance + extraZoneDoubleSize;
+            newSize.x = mapX * floorGrassDistance + extraZoneDoubleSize * 2.0f;
             newSize.y = 10.0f;
             newSize.z = 1.0f;
 
@@ -337,12 +348,12 @@ public class MapGenerator : MonoBehaviour
         //Bottom Side
         {
             Vector3 newSize = new Vector3();
-            newSize.x = mapX * floorGrassDistance + extraZoneDoubleSize;
+            newSize.x = mapX * floorGrassDistance + extraZoneDoubleSize * 2.0f;
             newSize.y = 10.0f;
             newSize.z = 1.0f;
 
             Vector3 newPos = new Vector3();
-            newPos.x = mapX * floorGrassSize - extraZoneSize;
+            newPos.x = mapX * floorGrassSize;
             newPos.y = 0.0f;
             newPos.z = -invisibleWallHalfSize - extraZoneSize;
 
@@ -527,7 +538,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        //Grass Diffrent Rule
+        //Grass Different Rule
         //10*10 array
         {
             const int arrLength = 100;
@@ -710,7 +721,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     GameObject floor = GenerateFloorGrass();
                     Vector3 newPos = new Vector3();
-                    newPos.x = (mapZ+1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                    newPos.x = (mapZ + 1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
                     newPos.z = firstPosGrassZ + (i * floorGrassDistance);
 
                     floor.transform.position = newPos;
@@ -767,7 +778,7 @@ public class MapGenerator : MonoBehaviour
             {
                 GameObject floor = GenerateFloorGrass();
                 Vector3 newPos = new Vector3();
-                newPos.x = (mapZ+1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
+                newPos.x = (mapZ + 1) * floorGrassDistance + extraZoneSize - firstPosGrassX;
                 newPos.z = -(firstPosGrassZ + extraZoneSize);
 
                 floor.transform.position = newPos;
@@ -934,6 +945,81 @@ public class MapGenerator : MonoBehaviour
 
     }
 
+    #endregion
+
+    #region Power Generator Placement
+    void PlacingPowerGenerator()
+    {
+        float offsetSize = 2.0f;
+        float offsetZTop = 3.0f;
+        Vector3 startPos = new Vector3(offsetSize, 0, offsetSize);
+        float offsetX = (floorGrassSize * mapX * 2) - offsetSize;
+        float offsetZ = (floorGrassSize * mapZ * 2) - offsetSize - offsetZTop;
+        Vector3 endPos = Vector3.zero;
+        endPos.x = offsetX;
+        endPos.y = 0.0f;
+        endPos.z = offsetZ;
+
+        List<GameObject> genList = new List<GameObject>();
+
+        for (int i = 0; i < generatorMaxNum; ++i)
+        {
+            var obj = Instantiate(prefPowerGenerator);
+
+            //min generator distance
+            Vector3 pos = Vector3.zero;
+            bool isCanPlaced = true;
+            do
+            {
+                isCanPlaced = true;
+                pos.x = Random.Range(startPos.x, endPos.x);
+                pos.z = Random.Range(startPos.z, endPos.z);
+
+                //for (int j = 0; j < genList.Count; ++j)
+                //{
+                //    float distance = Vector3.Distance(pos, genList[j].transform.position);
+                //    if (distance <= minGeneratorSeperateDistance)
+                //    {
+                //        isCanPlaced = false;
+                //        break;
+                //    }
+                //}
+            }
+            while (!isCanPlaced);
+
+            genList.Add(obj);
+            obj.transform.position = pos;
+            obj.transform.parent = powerGeneratorParent.transform;
+        }
+
+        //clear bush / stump
+        GameObject[] objBush = GameObject.FindGameObjectsWithTag("Bush");
+        GameObject[] objStump = GameObject.FindGameObjectsWithTag("Stump");
+
+        foreach (var generator in genList)
+        {
+            foreach (GameObject obj in objBush)
+            {
+                float distance = Vector3.Distance(generator.transform.position, obj.transform.position);
+                if (distance <= generatorClearObjectDistance)
+                {
+                    obj.SetActive(false);
+                    Destroy(obj);
+                }
+            }
+
+            foreach (GameObject obj in objStump)
+            {
+                float distance = Vector3.Distance(generator.transform.position, obj.transform.position);
+                if (distance <= generatorClearObjectDistance)
+                {
+                    obj.SetActive(false);
+                    Destroy(obj.gameObject);
+                }
+            }
+        }
+
+    }
     #endregion
 
     #endregion

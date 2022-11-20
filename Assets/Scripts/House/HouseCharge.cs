@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class HouseCharge : MonoBehaviour
 {
+    [field: Header("Energy Charge per Second")]
+    [field: SerializeField] float EnergyChargePerSec { set; get; } = 5.5f;
+
+    [field: Header("Script References")]
+    [field: SerializeField] PlayerEnergy playerEnergy;
+
+    private void Awake()
+    {
+        playerEnergy = FindObjectOfType<PlayerEnergy>();
+    }
+
     //ChargeZone
     //プレイヤーのEnergyを回復する
     //回復値はPlayerToolから設定（Player->Tool）
@@ -13,7 +24,7 @@ public class HouseCharge : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            var playerEnergy = other.GetComponent<PlayerEnergy>();
+            playerEnergy.EnergyChargePerSec = EnergyChargePerSec;
             playerEnergy.IsRecharging = true;
         }
     }
@@ -22,7 +33,6 @@ public class HouseCharge : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            var playerEnergy = other.GetComponent<PlayerEnergy>();
             playerEnergy.IsRecharging = false;
         }
     }

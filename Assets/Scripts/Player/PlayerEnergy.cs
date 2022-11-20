@@ -10,7 +10,7 @@ public class PlayerEnergy : MonoBehaviour
     //最大Energy
     [field: SerializeField] public float PlayerEnergyMax { private set; get; } = 100.0f;
     //チャージしている時のもらうEnergy (Time.deltaTimeに掛ける)
-    [field: SerializeField] public float EnergyChargePerSec { private set; get; } = 5.5f;
+    [field: SerializeField] public float EnergyChargePerSec { set; get; } = 5.5f;
 
 
     [field: Header("Player Energy Property")]
@@ -22,6 +22,7 @@ public class PlayerEnergy : MonoBehaviour
     [field: SerializeField] public bool IsRecharging { set; get; }
     //入力請けいるかどうか
     [field: SerializeField] public bool IsInputDisabled { set; get; }
+    [field: SerializeField] public bool IsHaveEnergy { set; get; }
 
     [field: Header("Script References")]
     [field: SerializeField] PlayerTool playerTool;
@@ -44,6 +45,7 @@ public class PlayerEnergy : MonoBehaviour
         //最初のEnergyは満タンにする
         PlayerEnergyValue = PlayerEnergyMax;
         playerUI.UpdateEnergyBarUI();
+        IsHaveEnergy = true;
     }
 
     // Update is called once per frame
@@ -57,7 +59,7 @@ public class PlayerEnergy : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             IsUseEnergy = true;
-            if (playerTool.IsToolCuttingGrass)
+            if (playerTool.IsToolCuttingGrass && IsHaveEnergy)
             {
                 SfxPlayCuttingGrass.PlaySFXSound();
             }
@@ -87,6 +89,7 @@ public class PlayerEnergy : MonoBehaviour
     public void AddPlayerEnergy(float value)
     {
         PlayerEnergyValue += value;
+        IsHaveEnergy = true;
         if (PlayerEnergyValue > PlayerEnergyMax)
         {
             PlayerEnergyValue = PlayerEnergyMax;
@@ -99,8 +102,10 @@ public class PlayerEnergy : MonoBehaviour
     void ReducePlayerEnergy(float value)
     {
         PlayerEnergyValue -= value;
-        if (PlayerEnergyValue < PlayerEnergyMin)
+        if (PlayerEnergyValue <= PlayerEnergyMin)
         {
+            IsHaveEnergy = false;
+            SfxPlayCuttingGrass.StopSFXSound();
             PlayerEnergyValue = PlayerEnergyMin;
         }
         playerUI.UpdateEnergyBarUI();
@@ -111,15 +116,25 @@ public class PlayerEnergy : MonoBehaviour
     //energyNeededはSingleBushスクリプトに設定する（prefabs/GardenDecoration/Bushes/Bushes_Single）
     public bool ActionCutGrass(float energyNeeded)
     {
+        if (IsInputDisabled)
+        {
+            return false;
+        }
+
         if (IsUseEnergy)
         {
             float energyNeededPerFrame = energyNeeded * Time.deltaTime;
+            float energyReduced = energyNeededPerFrame;
             float energyLeft = PlayerEnergyValue - energyNeededPerFrame;
             if (energyLeft < 0)
             {
+                if (PlayerEnergyValue > 0)
+                {
+                    energyReduced = PlayerEnergyValue;
+                }
                 return false;
             }
-            ReducePlayerEnergy(energyNeededPerFrame);
+            ReducePlayerEnergy(energyReduced);
             return true;
         }
         return false;

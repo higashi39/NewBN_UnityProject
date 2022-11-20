@@ -79,8 +79,16 @@ public class PlayerMove : MonoBehaviour
         {
             return;
         }
-        PlayerWalkRunSoundHandler();
+
         MovementSpeedUpdate();
+
+        //Sound
+        bool isMoving = true;
+        if (MovementSpeed == 0.0f)
+        {
+            isMoving = false;
+        }
+        PlayerWalkRunSoundHandler(isMoving);
 
         if (playerTool.IsToolCuttingGrass)
         {

@@ -53,6 +53,9 @@ public class PlayerSkillCrushAndRun : MonoBehaviour
     [field: Header("Script References")]
     PlayerUI playerUI;
 
+    [field: Header("SFX")]
+    [field: SerializeField] SFXPlay SfxPlayPUseSkill { set; get; }
+
     void Awake()
     {
         playerUI = GetComponent<PlayerUI>();
@@ -127,6 +130,7 @@ public class PlayerSkillCrushAndRun : MonoBehaviour
     {
         if (SkillValue >= SkillValueMax || IsUseSkill)
         {
+            SfxPlayPUseSkill.PlaySFXSound();
             return true;
         }
         return false;

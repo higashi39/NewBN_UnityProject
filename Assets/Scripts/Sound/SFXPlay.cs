@@ -22,6 +22,20 @@ public class SFXPlay : MonoBehaviour
         }
     }
 
+    public void PlaySFXSoundForce()
+    {
+        sound.Play();
+    }
+
+    public void PlaySFXSoundFromStartSecond(float time)
+    {
+        if (!sound.isPlaying)
+        {
+            sound.time = time;
+            sound.Play();
+        }
+    }
+
     //SFX‚ðŽ~‚Ü‚é
     public void StopSFXSound()
     {

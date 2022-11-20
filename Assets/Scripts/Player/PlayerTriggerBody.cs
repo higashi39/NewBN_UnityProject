@@ -9,12 +9,16 @@ public class PlayerTriggerBody : MonoBehaviour
     //Player->PlayerTriggerBody‚É“\‚é
     [field: SerializeField] public bool IsInsideBush { set; get; } = false;
 
+    [field: Header("SFX")]
+    [field: SerializeField] SFXPlay SfxPlayPlayerHitBushes { set; get; }
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Bush"))
         {
             IsInsideBush = true;
+            SfxPlayPlayerHitBushes.PlaySFXSound();
         }
     }
 

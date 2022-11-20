@@ -6,6 +6,7 @@ public class PlayerTool : MonoBehaviour
 {
     [field: Header("Prefab Particle")]
     [field: SerializeField] GameObject prefParticleLeaf;
+    [field: SerializeField] GameObject particleCollisionPlane;
 
     [field: Header("Player Tool Properties")]
     //今草を刈っているかどうか
@@ -18,6 +19,14 @@ public class PlayerTool : MonoBehaviour
     [field: SerializeField] PlayerSkillCrushAndRun playerSkill;
     [field: SerializeField] PlayerTriggerBody playerTriggerBody;
     [field: SerializeField] PresentGenerator presentGenerator;
+
+    [field: Header("SFX")]
+    [field: SerializeField] SFXPlay SfxPlayToolHitStump { set; get; }
+    [field: SerializeField] SFXPlay SfxPlayToolHitGenerator { set; get; }
+    [field: SerializeField] SFXPlay SfxPlayBushesPop { set; get; }
+    [field: SerializeField] SFXPlay SfxPlayBushesPopWithPresent { set; get; }
+
+
 
     void Awake()
     {
@@ -51,6 +60,7 @@ public class PlayerTool : MonoBehaviour
         else if (playerEnergy.ActionCutGrass(bushesTarget.EnergyConsumeValue))
         {
             IsToolCuttingGrass = true;
+
             isDestroyBush = bushesTarget.CutBushes();
         }
 
@@ -58,7 +68,7 @@ public class PlayerTool : MonoBehaviour
         if (isDestroyBush)
         {
             //プレゼントを生成
-            presentGenerator.GeneratePresent(bushesTarget.transform.position);
+            bool isPresentAppear = presentGenerator.GeneratePresent(bushesTarget.transform.position);
             //スキル値をもらう
             playerSkill.AddSkillValue(bushesTarget.SkillGetValue);
             //草刈りをしない
@@ -66,6 +76,16 @@ public class PlayerTool : MonoBehaviour
             //Energyも使わないとSFXも消す
             playerEnergy.IsUseEnergy = false;
             playerEnergy.SfxPlayCuttingGrass.StopSFXSound();
+
+            //SFX
+            if (isPresentAppear)
+            {
+                SfxPlayBushesPopWithPresent.PlaySFXSound();
+            }
+            else
+            {
+                SfxPlayBushesPop.PlaySFXSound();
+            }
 
             //草の中にいない
             playerTriggerBody.IsInsideBush = false;
@@ -76,11 +96,30 @@ public class PlayerTool : MonoBehaviour
             Vector3 newPos = bushesTarget.transform.position;
             newPos.y += 1.0f;
             obj.transform.position = newPos;
+
+            var parSys = obj.GetComponent<ParticleSystem>();
+            var parSysCol = parSys.collision;
+            parSysCol.SetPlane(0, particleCollisionPlane.transform);
+
             Destroy(obj, 3.0f);
         }
 
         //草の参照をリセット
         bushesTarget = null;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Stump"))
+        {
+            SfxPlayToolHitStump.PlaySFXSound();
+        }
+
+        if (other.CompareTag("PowerGenerator"))
+        {
+            SfxPlayToolHitGenerator.PlaySFXSound();
+        }
+        
     }
 
     private void OnTriggerStay(Collider other)

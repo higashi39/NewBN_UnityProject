@@ -2,22 +2,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class PlayerUI : MonoBehaviour
 {
     [field: Header("UI Energy")]
+    [field: SerializeField] GameObject energyParent;
     [field: SerializeField] Image imgMaskEnergy;
+    [field: SerializeField] RawImage imgEnergyFill;
+    [field: SerializeField] bool isEnergyFull;
 
     [field: Header("UI Skill")]
+    [field: SerializeField] GameObject skillParent;
     [field: SerializeField] Image imgMaskSkill;
+    [field: SerializeField] RawImage imgSkillFill;
+    [field: SerializeField] bool isSkillFull;
+
+    [field: Header("UI Enery & Skill Animation")]
+    [field: SerializeField] float skillBarFillAnimationSpeed = 0.15f;
+    [field: SerializeField] float skillBarFillValueAnimationSpeed = 0.2f;
+    [field: SerializeField] float skillBarFullAnimationTime = 0.2f;
+    [field: SerializeField] float skillBarFullAnimationTimeDelay = 0.1f;
+    const float parentTargetRotationZ = 3.0f;
+
 
     [field: Header("UI Collected Present")]
     [field: SerializeField] Text txtCollectedPresent;
+    [field: SerializeField] float timeCollectedPresent = 3.0f;
+    [field: SerializeField] float timeCollectedPresentDelay = 3.0f;
 
     [field: Header("Script References")]
     PlayerSkillCrushAndRun playerSkill;
     PlayerEnergy playerEnergy;
     GameManager gameManager;
+
+    [field: Header("Coroutine")]
+    Coroutine energyCoroutine;
+    Coroutine skillCoroutine;
 
     //--------------------------------------------------------------------------------------
     //  今は使わない（スキルゲージのアニメーションのため）
@@ -46,6 +67,11 @@ public class PlayerUI : MonoBehaviour
     //public GameObject prefUISkillSeparator;
     //--------------------------------------------------------------------------------------
 
+    private void Start()
+    {
+        //isEnergyFull = true;
+        //StartCoroutine(AnimationEnergyBarFull());
+    }
 
     private void Awake()
     {
@@ -54,16 +80,10 @@ public class PlayerUI : MonoBehaviour
         gameManager = FindObjectOfType<GameManager>();
     }
 
-    // Start is called before the first frame update
-    void Start()
+    private void Update()
     {
-        UpdateCollectedPresentUI();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        AnimateFillBar(imgEnergyFill);
+        AnimateFillBar(imgSkillFill);
     }
 
     //正規化する値を戻る
@@ -79,22 +99,77 @@ public class PlayerUI : MonoBehaviour
     public void UpdateEnergyBarUI()
     {
         float fillValue = GetImageFillValueNormalized(playerEnergy.PlayerEnergyValue, playerEnergy.PlayerEnergyMin, playerEnergy.PlayerEnergyMax);
-        imgMaskEnergy.fillAmount = fillValue;
+        imgMaskEnergy.DOFillAmount(fillValue, skillBarFillValueAnimationSpeed).SetEase(Ease.OutCirc);
+        isEnergyFull = false;
+        if (fillValue >= 1.0f)
+        {
+            isEnergyFull = true;
+            if (energyCoroutine == null)
+            {
+                energyCoroutine = StartCoroutine(AnimationEnergyBarFull());
+            }
+        }
     }
 
     //Skillのゲージの値を更新する
     public void UpdateSkillBarUI()
     {
         float fillValue = GetImageFillValueNormalized(playerSkill.SkillValue, playerSkill.SkillValueMin, playerSkill.SkillValueMax);
-        imgMaskSkill.fillAmount = fillValue;
+        imgMaskSkill.DOFillAmount(fillValue, skillBarFillValueAnimationSpeed).SetEase(Ease.OutCirc);
+        isSkillFull = false;
+        if (fillValue >= 1.0f)
+        {
+            isSkillFull = true;
+            if (skillCoroutine == null)
+            {
+                skillCoroutine = StartCoroutine(AnimationSkillBarFull());
+            }
+        }
     }
-
 
     //もらったプレゼント箱数を更新する
     public void UpdateCollectedPresentUI()
     {
-        txtCollectedPresent.text = gameManager.PresentGetNum.ToString();
+        StartCoroutine(AnimationPlayerCollectedPresent());
     }
+
+    #region ANIMATION
+    IEnumerator AnimationPlayerCollectedPresent()
+    {
+        yield return new WaitForSeconds(timeCollectedPresentDelay);
+        Vector3 scaleStart = Vector3.zero;
+        Vector3 scaleTarget = Vector3.one; //new Vector3(1.f, 1.4f, 1.4f);
+        {
+            txtCollectedPresent.transform.localScale = scaleStart;
+        }
+        txtCollectedPresent.transform.DOScale(scaleTarget, timeCollectedPresent).SetEase(Ease.OutBack);
+        txtCollectedPresent.text = gameManager.PresentGetNum.ToString();
+        yield return null;
+    }
+
+    IEnumerator AnimationEnergyBarFull()
+    {
+        while (isEnergyFull)
+        {
+            energyParent.transform.DOPunchRotation(new Vector3(0.0f, 0.0f, 2.0f), skillBarFullAnimationTime, 4, 10.0f);
+            yield return new WaitForSeconds(skillBarFullAnimationTime + skillBarFullAnimationTimeDelay);
+        }
+        energyCoroutine = null;
+    }
+
+    IEnumerator AnimationSkillBarFull()
+    {
+        while (isSkillFull)
+        {
+            skillParent.transform.DOPunchRotation(new Vector3(0.0f, 0.0f, 2.0f), skillBarFullAnimationTime, 4, 10.0f);
+            yield return new WaitForSeconds(skillBarFullAnimationTime + skillBarFullAnimationTimeDelay);
+        }
+        skillCoroutine = null;
+    }
+
+
+    #endregion
+
 
     #region UI SKILL
     //今は使わない
@@ -130,23 +205,23 @@ public class PlayerUI : MonoBehaviour
     //    //}
     //}
 
-    //void AnimateSkillBar()
-    //{
-    //    //Rect uvRect = imgSkillFill.uvRect;
-    //    //uvRect.x += skillBarFillAnimationSpeed * Time.deltaTime;
-    //    //imgSkillFill.uvRect = uvRect;
+    void AnimateFillBar(RawImage imgFill)
+    {
+        Rect uvRect = imgFill.uvRect;
+        uvRect.x += skillBarFillAnimationSpeed * Time.deltaTime;
+        imgFill.uvRect = uvRect;
 
-    //    //if (!isAnimateSkillUI) return;
+        //if (!isAnimateSkillUI) return;
 
-    //    //timeSkillValueNow += skillFillSpeed * Time.deltaTime;
-    //    //timeSkillValueInterpolate = skillFillSpeedCurve.Evaluate(timeSkillValueNow);
+        //timeSkillValueNow += skillFillSpeed * Time.deltaTime;
+        //timeSkillValueInterpolate = skillFillSpeedCurve.Evaluate(timeSkillValueNow);
 
-    //    //float nowAnimatedValue = Mathf.Lerp(skillFillLastValue, skillFillTargetValue, timeSkillValueInterpolate);
+        //float nowAnimatedValue = Mathf.Lerp(skillFillLastValue, skillFillTargetValue, timeSkillValueInterpolate);
 
-    //    //imgMask.fillAmount = nowAnimatedValue / playerSkill.GetSKillValueMax();
+        //imgMask.fillAmount = nowAnimatedValue / playerSkill.GetSKillValueMax();
 
-    //    //CheckAnimateSkillBar();
-    //}
+        //CheckAnimateSkillBar();
+    }
 
     //public void GetNewSkillValue()
     //{

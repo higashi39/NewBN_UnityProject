@@ -14,7 +14,7 @@ public class PlayerMain : MonoBehaviour
         playerMove = GetComponent<PlayerMove>();
         playerSkill = GetComponent<PlayerSkillCrushAndRun>();
         playerEnergy = GetComponent<PlayerEnergy>();
-    }
+        }
 
     //  ƒvƒŒƒCƒ„[‚Ì“ü—Í‚ğİ’è‚·‚é
     public void SetPlayerInputDisabled(bool isDisabled = true)
@@ -22,6 +22,7 @@ public class PlayerMain : MonoBehaviour
         playerMove.IsInputDisabled = isDisabled;
         playerSkill.IsInputDisabled = isDisabled;
         playerEnergy.IsInputDisabled = isDisabled;
+
     }
 
 }

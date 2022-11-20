@@ -30,7 +30,7 @@ public class PresentGenerator : MonoBehaviour
     //プレゼントが出なかったら➝次のプレゼント出る可能性が増やす（++CuttedGrassCount　➝　AnimationCurve presentAppearChanceはCuttedGrassCountの値を使う）
     //出たらCuttedGrassCountは0にリセット
     //GameManagerに報告
-    public void GeneratePresent(Vector3 posCutted)
+    public bool GeneratePresent(Vector3 posCutted)
     {
         float presentAppearPercentage = presentAppearChance.Evaluate(CuttedGrassCount);
         float randomAppearPercentage = Random.Range(0.0f, 100.0f);
@@ -44,9 +44,10 @@ public class PresentGenerator : MonoBehaviour
                 GameObject obj = Instantiate(prefPresent);
                 posCutted.y += 0.5f;
                 obj.transform.position = posCutted;
-                
+                return true;
             }
         }
+        return false;
 
     }
 
