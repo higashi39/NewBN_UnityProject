@@ -103,6 +103,8 @@ public class NewPresentBoxManager : MonoBehaviour
     private GameObject decorationRandomObj;
     private int decorationChoiceNum;
 
+    [field: SerializeField] bool IsSuccessOpeningPresentBefore { set; get; } = false;
+
     [field: Header("SFX")]
     [field: SerializeField] SFXPlay SfxPlayPresentGet { set; get; }
     [field: SerializeField] SFXPlay SfxPlayPresentMiss { set; get; }
@@ -172,7 +174,7 @@ public class NewPresentBoxManager : MonoBehaviour
             pos.z = 0;
             imgPresentDecorTransform.anchoredPosition = pos;
 
-            if (gameManager.PresentGetNum != 0)
+            if (gameManager.PresentGetNum != 0 && IsSuccessOpeningPresentBefore)
             {
                 // 元々持っていたデコレーションを手放す
                 decorationUsedList.Add(decorationRandomObj);
@@ -358,6 +360,7 @@ public class NewPresentBoxManager : MonoBehaviour
     // デコレーションをゲットしたときの処理
     public IEnumerator GetPresent()
     {
+        IsSuccessOpeningPresentBefore = true;
         // どのデコレーションが出るか
         decorationRandomObj = decorationList[Random.Range(0, decorationList.Count)];
         decoration = decorationRandomObj;
@@ -403,6 +406,7 @@ public class NewPresentBoxManager : MonoBehaviour
 
     public IEnumerator NotGetPresent()
     {
+        IsSuccessOpeningPresentBefore = false;
         SfxPlayPresentMiss.PlaySFXSound();
         Debug.Log("NotGetPresentに入った");
         //RectTransform notGetPresent = newPresentBoxManager.presentBox.GetComponent<RectTransform>();
@@ -447,8 +451,6 @@ public class NewPresentBoxManager : MonoBehaviour
         gameManager.GetPresentFromBox(false);
         yield return null;
     }
-
-
 
     IEnumerator Popout()
     {

@@ -159,7 +159,18 @@ public class GameManager : MonoBehaviour
         {
             HowToPlayStartDelayTime = 0.0f;
         }
-        StartCoroutine(StartPnlHowToPlayAnimation());
+
+        GameTutorialIndicator.instance.IsShowTutorialThisTime = GameTutorialIndicator.instance.IsShowTutorial;
+        if (GameTutorialIndicator.instance.IsShowTutorialThisTime)
+        {
+            GameTutorialIndicator.instance.IsShowTutorial = false;
+            StartCoroutine(StartPnlHowToPlayAnimation());
+        }
+        else
+        {
+            pnlBlock.SetActive(false);
+            StartCoroutine(StartGameAnimation());
+        }
     }
 
     // Update is called once per frame
@@ -203,6 +214,11 @@ public class GameManager : MonoBehaviour
     //ゲームスタートアニメション
     IEnumerator StartGameAnimation()
     {
+        if (!GameTutorialIndicator.instance.IsShowTutorialThisTime)
+        {
+            yield return new WaitForSeconds(HowToPlayStartDelayTime);
+        }
+
         SetEnableAllUI();
 
         int counterTime = 4;    // 3 2 1 GO!
@@ -438,6 +454,7 @@ public class GameManager : MonoBehaviour
     //pnlEndのボタンに設定する
     public void PressBtnMainMenu()
     {
+        GameTutorialIndicator.instance.IsShowTutorial = true;
         SFXButton.Instance.PlayButtonPressSFX();
         EndGameButtonPressAnimation();
         SceneTransitionAnimation.instance.ChangeScene("MainMenu");
@@ -564,8 +581,8 @@ public class GameManager : MonoBehaviour
         {
             HowToPlayTextHelper tmp;
             tmp.ExplainSubTitleText = "2.左クリックホールドで道を開く";
-            tmp.ExplainDetailText = "草のあるところで左クリックを一定時間ホールドすると、\n草を刈れるよ" +
-                            "\n草を刈ると確率でプレゼントが！\nたくさんのプレゼントを集めよう";
+            tmp.ExplainDetailText = "草のあるところで左クリックを一定時間ホールドすると\n草を刈れるよ！" +
+                            "\n草を刈ると確率でプレゼントが手に入る！\nたくさんのプレゼントを集めよう";
 
             TextSubTitleList.Add(tmp);
         }
@@ -574,8 +591,8 @@ public class GameManager : MonoBehaviour
         {
             HowToPlayTextHelper tmp;
             tmp.ExplainSubTitleText = "3. プレゼントを開けよう";
-            tmp.ExplainDetailText = "プレゼントを見つけたら開けてみよう\nプレゼントの開け方はプレゼントによって様々" +
-                            "\nクリックしたり、引っ張ったり...\n制限時間内に素早く開けてみよう";
+            tmp.ExplainDetailText = "プレゼントを見つけたら開けてみよう！\nプレゼントの開け方はプレゼントによって違うよ" +
+                            "\nクリックしたり、引っ張ったり...\n制限時間内に素早く開けてみよう！！！";
 
             TextSubTitleList.Add(tmp);
         }
@@ -585,8 +602,8 @@ public class GameManager : MonoBehaviour
             HowToPlayTextHelper tmp;
             tmp.ExplainSubTitleText = "＜ゲージの説明＞ 草刈り機の充電";
             tmp.ExplainDetailText = "草を刈っていると、青色の草刈り機ゲージが減るよ" +
-                            "\nゲージが空になると、草を刈れなくなってしまう！" +
-                            "マップの上側にある家の前まで行って、充電しよう！";
+                            "\nゲージが空になると、草を刈れなくなってしまう・・・\n" +
+                            "マップの上側にある家の前か、庭にある充電器で\n充電しよう！";
 
             TextSubTitleList.Add(tmp);
         }
@@ -597,7 +614,7 @@ public class GameManager : MonoBehaviour
             tmp.ExplainSubTitleText = "＜ゲージの説明＞ ギャー君のスキル";
             tmp.ExplainDetailText = "草を刈っていると黄色のスキルゲージがたまるよ" +
                             "\nゲージがいっぱいになった状態で右クリックを押すと、\nスキルが発動されて、ギャー君のスピードがあがるよ！" +
-                            "\n一気に草を刈ることができるから、上手く使って、たくさんのプレゼントを見つけよう！";
+                            "\n一気に草を刈ることができるから、\n上手く使って、たくさんのプレゼントを見つけよう！";
 
             TextSubTitleList.Add(tmp);
         }

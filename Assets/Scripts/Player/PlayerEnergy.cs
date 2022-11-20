@@ -126,13 +126,13 @@ public class PlayerEnergy : MonoBehaviour
             float energyNeededPerFrame = energyNeeded * Time.deltaTime;
             float energyReduced = energyNeededPerFrame;
             float energyLeft = PlayerEnergyValue - energyNeededPerFrame;
-            if (energyLeft < 0)
+            if (energyLeft < 0.0f)
             {
-                if (PlayerEnergyValue > 0)
+                if (PlayerEnergyValue <= 0.0f)
                 {
-                    energyReduced = PlayerEnergyValue;
+                    return false;
                 }
-                return false;
+                energyReduced = PlayerEnergyValue;
             }
             ReducePlayerEnergy(energyReduced);
             return true;

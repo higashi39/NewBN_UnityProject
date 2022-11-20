@@ -97,7 +97,7 @@ public class PlayerSkillCrushAndRun : MonoBehaviour
     //value‚Íiprefabs/GardenDecoration/Bushes/Bushes_Singlej‚©‚çİ’è‚·‚é
     public void AddSkillValue(float value)
     {
-        if (IsUseSkill)
+        if (IsUseSkill || IsUseSkillBeforeDisabled)
         {
             return;
         }

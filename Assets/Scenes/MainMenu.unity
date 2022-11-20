@@ -11836,7 +11836,7 @@ MonoBehaviour:
   <RandomTimerWaitMax>k__BackingField: 5
   <ShakePowerMin>k__BackingField: 5
   <ShakePowerMax>k__BackingField: 8
-  <ShakePowerFrame>k__BackingField: 30
+  <ShakePowerFrame>k__BackingField: 10
   <RandomTimerShakeMin>k__BackingField: 1.75
   <RandomTimerShakeMax>k__BackingField: 2.75
 --- !u!114 &1179506071
@@ -18080,7 +18080,7 @@ MonoBehaviour:
   cam: {fileID: 1742187302}
   dollyComponent: {fileID: 0}
   dollyTrack: {fileID: 1721138729}
-  <CamMoveSpeed>k__BackingField: 0.01
+  <CamMoveSpeed>k__BackingField: 0.005
   <AnimationTxtTitleTime>k__BackingField: 1
   <AnimationBtnStartTime>k__BackingField: 1.25
   <DollyTrackStopStart>k__BackingField: 3
@@ -23768,7 +23768,7 @@ MonoBehaviour:
   <RandomTimerWaitMax>k__BackingField: 5
   <ShakePowerMin>k__BackingField: 5
   <ShakePowerMax>k__BackingField: 8
-  <ShakePowerFrame>k__BackingField: 30
+  <ShakePowerFrame>k__BackingField: 10
   <RandomTimerShakeMin>k__BackingField: 1.75
   <RandomTimerShakeMax>k__BackingField: 2.75
 --- !u!114 &5941747337943568785
