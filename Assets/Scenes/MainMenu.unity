@@ -18080,7 +18080,7 @@ MonoBehaviour:
   cam: {fileID: 1742187302}
   dollyComponent: {fileID: 0}
   dollyTrack: {fileID: 1721138729}
-  <CamMoveSpeed>k__BackingField: 0.005
+  <CamMoveSpeed>k__BackingField: 0.01
   <AnimationTxtTitleTime>k__BackingField: 1
   <AnimationBtnStartTime>k__BackingField: 1.25
   <DollyTrackStopStart>k__BackingField: 3
